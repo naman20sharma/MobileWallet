@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:ob="clr-namespace:MyWallet.Models.Onboarding"
+             xmlns:ffimageloadingsvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+             ios:Page.UseSafeArea="true"
+             BackgroundColor="#FFFFFF"
+             NavigationPage.HasNavigationBar="False"
+             x:Class="MyWallet.Views.Onboarding.OnboardingPageV2">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="BlueColor">#071D92</Color>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource BlueColor}" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <!--<RowDefinition Height="auto" />-->
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <!--<Button Grid.Row="0"
+                    HorizontalOptions="EndAndExpand"
+                    Margin="0,0,20,0"
+                    FontSize="Medium"
+                    FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BlueColor}"
+                    Text="{Binding SkipButtonText}"
+                    Command="{Binding SkipCommand}"/>-->
+            <CarouselView x:Name="onBoardingCarousel"
+                          Grid.Row="0"
+                          ItemsSource="{Binding Items}" 
+                          VerticalOptions="Center"
+                          Position="{Binding Position}">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate x:DataType="ob:OnboardingModel">
+                        <ContentView>
+                            <FlexLayout Direction="Column"
+                                    JustifyContent="SpaceEvenly">
+                                <Label Text="{Binding Title}"
+                                       FontAttributes="Bold"
+                                       FontSize="Title" />
+                                <ffimageloadingsvg:SvgCachedImage                                  
+                                       Source="{Binding ImageUrl}"
+                                       Aspect="AspectFill"
+                                       WidthRequest="300" 
+                                       FlexLayout.AlignSelf="Center"/>
+                                <Label Text="{Binding Content}"
+                                       FontSize="Subtitle" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Padding="10"/>
+                            </FlexLayout>
+                        </ContentView>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+            <!--<IndicatorView x:Name="indicatorview"
+                    Grid.Row="1"
+                    HideSingle="True"
+                    IndicatorsShape="Circle"
+                    IndicatorView.ItemsSourceBy="onBoardingCarousel"
+                    IndicatorColor="DarkGray"
+                    SelectedIndicatorColor="{StaticResource BlueColor}"
+                    HorizontalOptions="Center"/>-->
+            <Button Margin="5" BackgroundColor="{StaticResource AppMainColor}" TextColor="White" Grid.Row="2" Text="{Binding NextButtonText}" Command="{Binding NextCommand}" />
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

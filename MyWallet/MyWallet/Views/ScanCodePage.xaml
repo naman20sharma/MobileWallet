@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:zxing="clr-namespace:ZXing.Net.Mobile.Forms;assembly=ZXing.Net.Mobile.Forms"
+             mc:Ignorable="d"
+             Title="{Binding Title}"
+             x:Class="MyWallet.Views.ScanCodePage">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="140" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="100" />
+            </Grid.RowDefinitions>
+            <zxing:ZXingScannerView Grid.RowSpan="3"
+                                    x:Name="ScannerView"
+                                    HorizontalOptions="Fill"
+                                    Result="{Binding Result, Mode=TwoWay}"
+                                    VerticalOptions="Fill"
+                                    IsScanning="{Binding IsScanning}"
+                                    IsAnalyzing="{Binding IsAnalyzing}"
+                                    ScanResultCommand="{Binding QRScanResultCommand}"
+                                    />
+            <StackLayout Grid.Row="0" VerticalOptions="Start">
+                <StackLayout BackgroundColor="Transparent" Margin="0,30,0,0">
+                    <!-- <Button ImageSource="back_icon" Command="{Binding NavigateBackCommand}" HeightRequest="60" WidthRequest="60" HorizontalOptions="Start" VerticalOptions="End" BackgroundColor="Transparent"/> -->
+                </StackLayout>
+                <Label Text="Point your camera to a &#x0a;QR Code to scan" VerticalOptions="End" TextColor="White"
+                       HorizontalTextAlignment="Center" FontSize="18"/>
+            </StackLayout>
+            <Grid Grid.Row="1">
+                <StackLayout>
+                    <Frame CornerRadius="60" HeightRequest="290" WidthRequest="290" VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="CenterAndExpand" BackgroundColor="Transparent" IsClippedToBounds="True">
+                        <StackLayout HeightRequest="290" WidthRequest="290" BackgroundColor="White" Opacity="0.3"
+                                     VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+                    </Frame>
+                </StackLayout>
+            </Grid>
+
+            <StackLayout Grid.Row="2" VerticalOptions="Start">
+                <StackLayout BackgroundColor="Transparent" Margin="0,30,0,0">
+                    <!-- <Button ImageSource="back_icon" Command="{Binding NavigateBackCommand}" HeightRequest="60" WidthRequest="60" HorizontalOptions="Start" VerticalOptions="End" BackgroundColor="Transparent"/> -->
+                </StackLayout>
+                <Button Text="Close" Command="{Binding NavigationBackCommand}" BackgroundColor="Transparent" VerticalOptions="End" TextColor="White"
+                        FontSize="18"/>
+            </StackLayout>
+        </Grid>
+    </ContentPage.Content>
+
+</ContentPage>

@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Title="{Binding ProofRequestObject.Name}"
+             x:Class="MyWallet.Views.Notification.ProofRequestPage">
+    <ContentPage.Content>
+        <Grid
+            Padding="0"
+            RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <!--<Label HorizontalTextAlignment="Center"  FontSize="Subtitle" Grid.Row="0" Text="The organization requesting the following information: " />-->
+            <ScrollView 
+                Grid.Row="1"
+                Padding="0">
+                
+                <!--<StackLayout
+                Grid.Row="0"
+                Padding="10"
+                
+                VerticalOptions="FillAndExpand">
+                    <Label
+                    FontSize="14"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding ProofRequestObject}"/>
+                    <Entry
+                    FontSize="14"
+                    HorizontalTextAlignment="Center"
+                    Text="{Binding ProofRequestObject}"/>
+                </StackLayout>-->
+
+                <ListView IsRefreshing="{Binding IsBusy}" ItemsSource="{Binding ProofRequestAndCredentialMaps} " >
+                    <ListView.ItemTemplate>
+                        <DataTemplate >
+                            <ViewCell >
+                                <ViewCell.View>
+
+                                    <!--<Grid  Padding="0"   >
+                                            <Grid.RowDefinitions >
+                                                <RowDefinition Height="50" ></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"></ColumnDefinition>
+                                                <ColumnDefinition Width="7*"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Margin="10,0,0,0"  Grid.Column="0"  Text="{Binding Path=Name}" />
+                                            <Label Margin="10,0,0,0" Grid.Column="1" 
+                                            Text="{Binding Path=Value}"
+                                            VerticalOptions="Center"/>
+
+                                        </Grid>-->
+                                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="{Binding Path=ProofKey}" />
+                                        <Grid>
+                                            <Grid.RowDefinitions></Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="5*" />
+                                                <ColumnDefinition Width="5*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Text="{Binding Path=CredentialAttribute.Key}" />
+                                            <Label Grid.Column="1" Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Path=CredentialAttribute.Value}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                                        </Grid>
+                                        
+                                    </StackLayout>
+
+                                </ViewCell.View>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.RowHeight>80</ListView.RowHeight>
+                </ListView>
+            </ScrollView>
+            <StackLayout                
+                Grid.Row="2"
+                Padding="5"
+                Orientation="Horizontal"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+                <Button
+                    Style="{DynamicResource RedButtonStyle}"
+                    Command="{Binding RejectProofRequestCommand}"
+                    HorizontalOptions="FillAndExpand"
+                    Text="Reject"/>
+                <Button Command="{Binding AcceptProofRequestCommand}" IsEnabled="False"                    
+                    HorizontalOptions="FillAndExpand"
+                    Style="{DynamicResource BlueButtonStyle}"   
+                    Text="Present"/>
+            </StackLayout>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

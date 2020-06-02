@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyWallet.Resources.DefaultThemes">
+    <!--Design guides-->
+    <Color x:Key="PrimaryColor">#5c6bc0</Color>
+    <Color x:Key="SecondaryColor">#8e99f3</Color>
+    <x:Double x:Key="BaseFontSize">16</x:Double>
+    <Color x:Key="BaseTextColor">#7b7b7b</Color>
+    <Color x:Key="LightTextColor">#FFFFFF</Color>
+
+    <Color x:Key="BlueAccentColor">#3891D6</Color>
+    <Color x:Key="RedAccentColor">#EE3A24</Color>
+    <Color x:Key="GreenAccentColor">#73DA73</Color>
+
+    <Color x:Key="BasePageColor">#EFEFF4</Color>
+
+    <Color x:Key="DarkPageColor">#F8F8F8</Color>
+    <Color x:Key="BaseContentViewColor">#FFFFFF</Color>
+
+    <Color x:Key="AppMainColor">#5c6bc0</Color>
+    <Color x:Key="AppMainColorLight">#8e99f3</Color>
+    <Color x:Key="AppMainColorDark">#26418f</Color>
+
+
+    <Color x:Key="Grey600Color">#757575</Color>
+    <Color x:Key="Gray-100">#f6f7f8</Color>
+    <Color x:Key="Gray-200">#ebecef</Color>
+    <Color x:Key="Gray-300">#ced2d9</Color>
+    <Color x:Key="Gray-400">#b2b8c2</Color>
+    <Color x:Key="Gray-500">#959eac</Color>
+    <Color x:Key="Gray-600">#788396</Color>
+    <Color x:Key="Gray-700">#606a7b</Color>
+    <Color x:Key="Gray-800">#4a515e</Color>
+    <Color x:Key="Gray-900">#333942</Color>
+    <Color x:Key="Gray-Black">#000000</Color>
+    <Color x:Key="Gray-White">#ffffff</Color>
+
+    <Color x:Key="NavigationBarColor">#2196f3</Color>
+    <Color x:Key="NavigationBarTextColor">#ffffff</Color>
+
+    <Style TargetType="NavigationPage" 
+           ApplyToDerivedTypes="true">
+        <Setter
+            Property="BarBackgroundColor"
+            Value="{ StaticResource AppMainColor }" />
+        <Setter
+            Property="BarTextColor"
+            Value="{ StaticResource LightTextColor }" />
+    </Style>
+
+    <Style
+        TargetType="TabbedPage"
+        ApplyToDerivedTypes="true">
+        <Setter Property="BarBackgroundColor" Value="#F6F8FA" />
+        <Setter Property="SelectedTabColor" Value="{ StaticResource AppMainColor}" />
+        <Setter Property="UnselectedTabColor" Value="{ StaticResource Grey600Color}" />
+    </Style>
+
+    <Style x:Key="BlueButtonStyle" 
+           TargetType="Button" 
+           ApplyToDerivedTypes="true">
+        <Setter Property="FontSize" 
+                Value="{StaticResource BaseFontSize}" />
+        <Setter Property="TextColor" 
+                Value="{StaticResource LightTextColor}" />
+        <Setter Property="BackgroundColor" 
+                Value="{StaticResource BlueAccentColor}" />
+    </Style>
+
+    <Style x:Key="RedButtonStyle" 
+           TargetType="Button" 
+           ApplyToDerivedTypes="true">
+        <Setter Property="FontSize"
+                Value="{StaticResource BaseFontSize}" />
+        <Setter Property="TextColor"
+                Value="{StaticResource LightTextColor}" />
+        <Setter Property="BackgroundColor"
+                Value="{StaticResource RedAccentColor}" />
+    </Style>
+
+    <Style x:Key="GreenButtonStyle" 
+           TargetType="Button"
+           ApplyToDerivedTypes="true">
+        <Setter Property="FontSize" 
+                Value="{StaticResource BaseFontSize}" />
+        <Setter Property="TextColor"
+                Value="{StaticResource BaseTextColor}" />
+        <Setter
+            Property="BackgroundColor"
+            Value="{StaticResource GreenAccentColor}" />
+    </Style>
+
+    <Style x:Key="ButtonStyleBase"
+           TargetType="Button">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="23,12" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HeightRequest" Value="32" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style x:Key="ButtonStylePrimary"
+           TargetType="Button"
+           ApplyToDerivedTypes="true"
+           BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="TextColor" Value="{StaticResource LightTextColor}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource BlueAccentColor}" />
+    </Style>
+
+    <Style x:Key="ButtonStyleSecondary"
+           TargetType="Button"
+           ApplyToDerivedTypes="true"
+           BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="TextColor" Value="{StaticResource BaseTextColor}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
+    <Style x:Key="ButtonStyleDestructive" 
+           TargetType="Button" 
+           ApplyToDerivedTypes="true"
+           BasedOn="{StaticResource ButtonStyleBase}">
+        <Setter Property="TextColor" Value="{StaticResource LightTextColor}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource RedAccentColor}" />
+    </Style>
+
+    <Style x:Key="IconButtonStyle"
+           TargetType="ImageButton"
+           ApplyToDerivedTypes="true">
+        <Setter Property="Aspect" Value="AspectFit" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="CornerRadius" Value="50" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="Transparent" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Pressed">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="#eeeeee" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="FontFamily" Value="{DynamicResource Montserrat-Regular}" />
+        <Setter Property="FontSize" Value="Small" />
+    </Style>
+
+    <OnPlatform x:Key="FontIcons" x:TypeArguments="x:String">
+        <OnPlatform.Platforms>
+            <On Platform="Android" Value="UIFontIcons.ttf#UIFontIcons" />
+            <On Platform="iOS" Value="UIFontIcons" />
+            <On Platform="UWP" Value="Assets/UIFontIcons.ttf#UIFontIcons" />
+        </OnPlatform.Platforms>
+    </OnPlatform>
+
+    <OnPlatform x:Key="Montserrat-SemiBold" x:TypeArguments="x:String">
+        <OnPlatform.Platforms>
+            <On Platform="Android" Value="Montserrat-SemiBold.ttf#Montserrat-SemiBold" />
+            <On Platform="iOS" Value="Montserrat-SemiBold" />
+            <On Platform="UWP" Value="Assets/Montserrat-SemiBold.ttf#Montserrat-SemiBold" />
+        </OnPlatform.Platforms>
+    </OnPlatform>
+
+    <OnPlatform x:Key="Montserrat-Regular" x:TypeArguments="x:String">
+        <OnPlatform.Platforms>
+            <On Platform="Android" Value="Montserrat-Regular.ttf#Montserrat-Regular" />
+            <On Platform="iOS" Value="Montserrat-Regular" />
+            <On Platform="UWP" Value="Assets/Montserrat-Regular.ttf#Montserrat-Regular" />
+        </OnPlatform.Platforms>
+    </OnPlatform>
+
+    <OnPlatform x:Key="Montserrat-Medium" x:TypeArguments="x:String">
+        <OnPlatform.Platforms>
+            <On Platform="Android" Value="Montserrat-Medium.ttf#Montserrat-Medium" />
+            <On Platform="iOS" Value="Montserrat-Medium" />
+            <On Platform="UWP" Value="Assets/Montserrat-Medium.ttf#Montserrat-Medium" />
+        </OnPlatform.Platforms>
+    </OnPlatform>
+
+    <OnPlatform x:Key="Montserrat-Bold" x:TypeArguments="x:String">
+        <OnPlatform.Platforms>
+            <On Platform="Android" Value="Montserrat-Bold.ttf#Montserrat-Bold" />
+            <On Platform="iOS" Value="Montserrat-Bold" />
+            <On Platform="UWP" Value="Assets/Montserrat-Bold.ttf#Montserrat-Bold" />
+        </OnPlatform.Platforms>
+    </OnPlatform>
+</ResourceDictionary>
+

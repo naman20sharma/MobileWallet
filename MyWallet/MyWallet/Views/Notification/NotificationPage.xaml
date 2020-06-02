@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:converters="clr-namespace:MyWallet.Converters;assembly=MyWallet"
+             xmlns:helpers="clr-namespace:MyWallet.Helpers;assembly=MyWallet"
+             xmlns:behaviours="clr-namespace:MyWallet.Behaviors;assembly=MyWallet"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             xmlns:ffimageloadingsvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
+             Title="{Binding Title}"
+             x:Class="MyWallet.Views.Notification.NotificationPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBooleanConverter x:Key="BooleanInverse" />
+            <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
+            <converters:NotificationTypeToColor x:Key="NotificationTypeToColor" />
+            <converters:NotificationTypeToIcon x:Key="NotificationTypeToIcon" />
+            <!--<converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />-->
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <StackLayout>
+            <ListView ItemsSource="{Binding NotificationItems}" 
+                      HasUnevenRows="true" 
+                      IsPullToRefreshEnabled="True"
+                      RefreshCommand="{Binding RefreshRecordCommand}"
+                      IsRefreshing="{Binding IsRefreshing}"
+                    
+                      >
+                <ListView.ItemTemplate >
+                    <DataTemplate >
+                        <ViewCell >
+                            <ViewCell.View>
+                                <Frame Margin="10,5" 
+                                       VerticalOptions="Start" 
+                                       Padding="0" 
+                                       HorizontalOptions="FillAndExpand" 
+                                       CornerRadius="5" >
+                                    <Grid  Padding="15"   >
+                                        <Grid.RowDefinitions >
+                                            <RowDefinition Height="Auto" ></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <!--<Frame Grid.Column="0" 
+                                           HeightRequest="40" 
+                                           WidthRequest="40" 
+                                           CornerRadius="20" 
+                                           HorizontalOptions="Start" 
+                                           VerticalOptions="Start"
+                                           BackgroundColor="BurlyWood"
+                                           Margin="0" 
+                                           Padding="0">
+                                            <Label HorizontalOptions="Center" VerticalOptions="Center" FontAttributes="Bold" TextColor="White" Text="C" />
+
+                                        </Frame>-->
+                                        <helpers:TintedCachedImage TintColor="{Binding NotificationType, Converter={StaticResource NotificationTypeToColor}}"  Grid.Column="0" VerticalOptions="StartAndExpand"  HeightRequest="24" WidthRequest="24" FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="{Binding NotificationType, Converter={StaticResource NotificationTypeToIcon}}">
+                                            <!--<ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="{Binding NotificationType, Converter={StaticResource NotificationTypeToColor}}" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>-->
+                                        </helpers:TintedCachedImage>
+                                        <StackLayout Grid.Column="1" >
+                                            <Label TextColor="{Binding NotificationType, Converter={StaticResource NotificationTypeToColor}}" FontSize="12" Text="{Binding NotificationType}" />
+                                            <Label Margin="0, 0, 0, 0" 
+                                                   FontFamily="{DynamicResource Montserrat-Medium}"
+                                                   TextColor="{DynamicResource Gray-900}"
+                                            Text="{Binding NotificationTitle}"
+                                            VerticalOptions="Center"/>
+                                            <Label Text="{Binding NotificationContent}" FontSize="14" />
+                                            <Label  Text="{Binding OrganizeAlias.Name, StringFormat='From: {0}' }" FontSize="13" />
+
+                                        </StackLayout>
+                                        <ffimageloading:CachedImage  Grid.Column="2" VerticalOptions="Center" HeightRequest="24" WidthRequest="24" DownsampleHeight="20" DownsampleWidth="10"  FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="chevron_right.png">
+                                            <ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="#606a7b" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>
+                                        </ffimageloading:CachedImage>
+
+                                    </Grid>
+                                </Frame>
+
+                            </ViewCell.View>
+                        </ViewCell>
+                    </DataTemplate>
+
+                </ListView.ItemTemplate>
+                <ListView.RowHeight>10</ListView.RowHeight>
+                <ListView.Behaviors>
+                    <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectNotificationItemCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true" />
+                </ListView.Behaviors>
+            </ListView>
+            <!--<Label Text="List Credential Offer:" />
+            <ListView ItemsSource="{Binding CredOffers}" 
+                      HasUnevenRows="true" 
+                      IsPullToRefreshEnabled="True"
+                      RefreshCommand="{Binding RefreshRecordCommand}"
+                      IsRefreshing="{Binding IsRefreshing}"
+                    
+                      >
+                <ListView.ItemTemplate >
+                    <DataTemplate >
+                        <ViewCell >
+                            <ViewCell.View>
+                                <Frame Margin="10,5" 
+                                       VerticalOptions="Start" 
+                                       Padding="0" 
+                                       HorizontalOptions="FillAndExpand" 
+                                       CornerRadius="5" >
+                                    <Grid  Padding="15"   >
+                                        <Grid.RowDefinitions >
+                                            <RowDefinition Height="Auto" ></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        --><!--<Frame Grid.Column="0" 
+                                           HeightRequest="40" 
+                                           WidthRequest="40" 
+                                           CornerRadius="20" 
+                                           HorizontalOptions="Start" 
+                                           VerticalOptions="Start"
+                                           BackgroundColor="BurlyWood"
+                                           Margin="0" 
+                                           Padding="0">
+                                            <Label HorizontalOptions="Center" VerticalOptions="Center" FontAttributes="Bold" TextColor="White" Text="C" />
+
+                                        </Frame>--><!--
+                                        <ffimageloading:CachedImage  Grid.Column="0" VerticalOptions="StartAndExpand"  HeightRequest="24" WidthRequest="24" FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="credential">
+                                            <ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="#0a8f08" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>
+                                        </ffimageloading:CachedImage>
+                                        <StackLayout Grid.Column="1" >
+                                            <Label TextColor="#0a8f08" FontSize="12" Text="Credential Offer" />
+                                            <Label Margin="0, 0, 0, 0" 
+                                                   FontFamily="{DynamicResource Montserrat-Medium}"
+                                            Text="{Binding Path=CredentialName}"
+                                            VerticalOptions="Center"/>
+                                            <Label Text="You've received a credential offer" FontSize="14" />
+                                            <Label  Text="From: Faber-Agent" FontSize="13" />
+
+                                        </StackLayout>
+                                        <ffimageloading:CachedImage  Grid.Column="2" VerticalOptions="Center" HeightRequest="24" WidthRequest="24" DownsampleHeight="20" DownsampleWidth="10"  FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="chevron_right.png">
+                                            <ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="#606a7b" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>
+                                        </ffimageloading:CachedImage>
+
+                                    </Grid>
+                                </Frame>
+
+                            </ViewCell.View>
+                        </ViewCell>
+                    </DataTemplate>
+
+                </ListView.ItemTemplate>
+                <ListView.RowHeight>10</ListView.RowHeight>
+                <ListView.Behaviors>
+                    <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectCredOfferCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true" />
+                </ListView.Behaviors>
+            </ListView>
+            <Label Text="List ProofRequest:" />
+            <ListView ItemsSource="{Binding ProofRequests}" 
+                      HasUnevenRows="true" 
+                      IsPullToRefreshEnabled="True"
+                      RefreshCommand="{Binding RefreshRecordCommand}"
+                      IsRefreshing="{Binding IsRefreshing}"
+                      >
+                <ListView.ItemTemplate >
+                    <DataTemplate >
+                        <ViewCell >
+                            <ViewCell.View>
+                                <Frame Margin="10, 5" 
+                                       VerticalOptions="Start" 
+                                       Padding="0" 
+                                       HorizontalOptions="FillAndExpand" 
+                                       CornerRadius="5" >
+                                    <Grid Padding="15"   >
+                                        <Grid.RowDefinitions >
+                                            <RowDefinition Height="Auto" ></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        --><!--<Frame Grid.Column="0" Grid.Row="0"
+                                           HeightRequest="40" 
+                                           WidthRequest="40" 
+                                           CornerRadius="20" 
+                                           HorizontalOptions="Start" 
+                                           VerticalOptions="Start"
+                                           BackgroundColor="AliceBlue"
+                                           Margin="0" 
+                                           Padding="0">
+                                            <Label HorizontalOptions="Center" VerticalOptions="Center" FontAttributes="Bold" TextColor="White" Text="P" />
+
+                                        </Frame>--><!--
+
+                                        <ffimageloading:CachedImage  Grid.Column="0" VerticalOptions="Start" HeightRequest="24" WidthRequest="24" FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="security.png">
+                                            <ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="#DD1287" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>
+                                        </ffimageloading:CachedImage>
+                                        <StackLayout Grid.Column="1" >
+                                            <Label TextColor="#DD1287" FontSize="12" Text="Proof Request" />
+                                            <Label Margin="0, 0, 0, 0" 
+                                                   FontFamily="{DynamicResource Montserrat-Medium}"
+                                            Text="{Binding Path=ProofRequestObject.Name}"
+                                            VerticalOptions="Center"/>
+                                            <Label Text="You've received a proof request" FontSize="14" />
+                                            <Label  Text="From: Faber-Agent" FontSize="13" />
+                                            
+                                        </StackLayout>
+                                        <ffimageloading:CachedImage  Grid.Column="2" VerticalOptions="Center" HeightRequest="24" WidthRequest="24" DownsampleHeight="20" DownsampleWidth="10"  FadeAnimationEnabled="true" DownsampleUseDipUnits="true" Aspect="Fill" Source="chevron_right.png">
+                                            <ffimageloading:CachedImage.Transformations>
+                                                <fftransformations:TintTransformation HexColor="#606a7b" EnableSolidColor="true"/>
+                                            </ffimageloading:CachedImage.Transformations>
+                                        </ffimageloading:CachedImage>
+
+                                    </Grid>
+                                </Frame>
+
+                            </ViewCell.View>
+                        </ViewCell>
+                    </DataTemplate>
+
+                </ListView.ItemTemplate>
+                <ListView.RowHeight>10</ListView.RowHeight>
+                <ListView.Behaviors>
+                    <behaviours:EventToCommandBehavior EventName="ItemSelected" Command="{Binding SelectProofRequestCommand}" Converter="{StaticResource SelectedItemConverter}" DeselectOnClick="true" />
+                </ListView.Behaviors>
+            </ListView>-->
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
+             Title="{Binding Title}"
+             x:Class="MyWallet.Views.Connections.ConnectionPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <!--<ImageButton
+                Source="keyboard_down_icon.png"
+                VerticalOptions="Center"
+                Aspect="AspectFit"
+                HorizontalOptions="FillAndExpand"
+                BackgroundColor="White"
+                HeightRequest="32"
+                CornerRadius="0"
+                Command="{Binding NavigateBackCommand}" />-->
+            <Grid
+                Padding="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition
+                        Width="50">
+                    </ColumnDefinition>
+                    <ColumnDefinition
+                        Width="*">
+                    </ColumnDefinition>
+                    <ColumnDefinition
+                        Width="Auto">
+                    </ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition
+                        Height="Auto">
+                    </RowDefinition>
+                    <RowDefinition
+                        Height="Auto">
+                    </RowDefinition>
+                    <RowDefinition
+                        Height="Auto">
+                    </RowDefinition>
+                    <RowDefinition
+                        Height="Auto">
+                    </RowDefinition>
+                </Grid.RowDefinitions>
+                <ffimageloading:CachedImage
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.RowSpan="2"
+                    VerticalOptions="Center"
+                    HeightRequest="50"
+                    WidthRequest="50"
+                    FadeAnimationEnabled="true"
+                    DownsampleUseDipUnits="true"
+                    Aspect="Fill"                   
+                    Source="{ Binding ConnectionImageUrl }">
+                    <ffimageloading:CachedImage.Transformations>
+                        <fftransformations:CircleTransformation />
+                    </ffimageloading:CachedImage.Transformations>
+                </ffimageloading:CachedImage>
+                <Label
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    FontSize="Medium"
+                    FontAttributes="Bold"
+                    Text="{Binding ConnectionName}" />
+                <Label
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="{Binding CreatedDate, StringFormat='Issued: {0:dd-MM-yyyy}'}"
+                    FontSize="Default" />
+                <Label
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    Text="{Binding ConnectionSubtitle}" />
+            </Grid>
+            <ScrollView >
+                <StackLayout BackgroundColor="White">
+                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="Endpoint" />
+                        <Label Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Record.Endpoint.Uri}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                    </StackLayout>
+                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="My Did" />
+                        <Label Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Path=Record.MyDid}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                    </StackLayout>
+                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="My Verkey" />
+                        <Label Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Path=Record.MyVk}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                    </StackLayout>
+                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="Their Did" />
+                        <Label Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Path=Record.TheirDid}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                    </StackLayout>
+                    <StackLayout Spacing="10" Padding="10,5" HeightRequest="100" >
+                        <Label Margin="0,0,10,0" Padding="0" FontSize="Caption" TextColor="Gray"  Text="Their Verkey" />
+                        <Label Margin="10,0,0,0"
+                                               FontSize="Body"
+                                            Text="{Binding Path=Record.TheirVk}"
+                                               TextColor="{DynamicResource AppMainColorLight}"
+                                            VerticalOptions="Center"/>
+                    </StackLayout>
+
+                </StackLayout>
+                
+
+            </ScrollView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

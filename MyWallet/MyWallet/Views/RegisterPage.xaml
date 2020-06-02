@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Title="{Binding Title}"
+             x:Class="MyWallet.Views.RegisterPage">
+    <ContentPage.Content>
+        <StackLayout
+            Spacing="150"
+            VerticalOptions="Center">
+            <Label
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Welcome to MyWallet. You need to create a wallet first"></Label>
+            <Button 
+                VerticalOptions="CenterAndExpand"
+                Text="Create Wallet"
+                Command="{Binding CreateWalletCommand}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
