@@ -21,6 +21,9 @@ using Plugin.LocalNotification;
 
 using FFImageLoading.Forms.Platform;
 using Plugin.Fingerprint;
+using Xamarin.Essentials;
+using Android.Webkit;
+using AndroidHUD;
 
 namespace MyWallet.Droid
 {
@@ -54,7 +57,12 @@ namespace MyWallet.Droid
             // Initializing FFImageLoading
             CachedImageRenderer.Init(false);
 
-            
+            NotificationCenter.CreateNotificationChannel(new Plugin.LocalNotification.Platform.Droid.NotificationChannelRequest()
+            {
+                Sound = Resource.Raw.swiftly.ToString(),
+                VibrationPattern = new long[] {0, 1000},
+                LockscreenVisibility = NotificationVisibility.Private
+            }) ; 
 
             //thinh nnd
             if ((int)Build.VERSION.SdkInt >= 23)
