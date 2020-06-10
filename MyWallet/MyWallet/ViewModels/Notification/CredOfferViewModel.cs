@@ -37,13 +37,13 @@ namespace MyWallet.ViewModels.Notification
         private readonly IEventAggregator _eventAggregator;
 
         public CredOfferViewModel(IUserDialogs userDialogs,
-            INavigationService navigationService, 
+            INavigationService navigationService,
             IAgentProvider agentProvider,
             ICredentialService credentialService,
             IMessageService messageService,
             IPoolService poolService,
             IWalletRecordService recordService,
-            IConnectionService connectionService, 
+            IConnectionService connectionService,
             IEventAggregator eventAggregator, CredentialRecord credentialOffer) :
             base(nameof(CredOfferViewModel), userDialogs, navigationService)
         {
@@ -61,7 +61,7 @@ namespace MyWallet.ViewModels.Notification
 
             if (_credentialOffer.CreatedAtUtc != null)
             {
-                IssuedDate = (DateTime)_credentialOffer.CreatedAtUtc;
+                IssuedDate = ((DateTime)_credentialOffer.CreatedAtUtc).ToLocalTime();
             }
         }
         private string ConvertNameFromeSchemaId(string schemaId)
@@ -82,7 +82,7 @@ namespace MyWallet.ViewModels.Notification
             set
             {
                 this.RaiseAndSetIfChanged(ref _credentialOffer, value);
-                if(value != null)
+                if (value != null)
                 {
                     _credentialAttributes = value.CredentialAttributesValues;
                 }
@@ -116,17 +116,17 @@ namespace MyWallet.ViewModels.Notification
         #region Bindable Command
         private async Task AcceptCredentialOffer()
         {
-            if(this.CredentialOffer != null)
+            if (this.CredentialOffer != null)
             {
                 var context = await _agentProvider.GetContextAsync();
                 var loadingDialog = DialogService.Loading("Proccessing");
                 try
                 {
-                    var poolConfigName = Preferences.Get(Constants.PoolConfigurationName, "bcovrin-test");    
+                    var poolConfigName = Preferences.Get(Constants.PoolConfigurationName, "bcovrin-test");
                     var a = await _poolService.GetPoolAsync(poolConfigName, 2);
                     var (requestMessage, credRecord) = await _credentialService.CreateRequestAsync(context, CredentialOffer.Id);
-                    var connectionRecord  = await _connectionService.GetAsync(context, credRecord.ConnectionId);
-                    await _messageService.SendAsync(context.Wallet, requestMessage, connectionRecord);      
+                    var connectionRecord = await _connectionService.GetAsync(context, credRecord.ConnectionId);
+                    await _messageService.SendAsync(context.Wallet, requestMessage, connectionRecord);
                     loadingDialog.Hide();
                     await NavigationService.NavigateBackAsync();
                     var toastConfig = new ToastConfig("Accepted Credential Offer");
@@ -134,19 +134,19 @@ namespace MyWallet.ViewModels.Notification
                     toastConfig.Position = ToastPosition.Top;
                     toastConfig.SetDuration(3000);
                     DialogService.Toast(toastConfig);
-                    
+
                     _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialsUpdated });
                 }
-                catch(IndyException e)
+                catch (IndyException e)
                 {
                     Console.WriteLine($"Error: {e.Message}");
                     loadingDialog.Hide();
                     await NavigationService.NavigateBackAsync();
-                    if(e.SdkErrorCode == 309)
+                    if (e.SdkErrorCode == 309)
                         await Application.Current.MainPage.DisplayAlert("Error", "Something wrong while connect to pool. Go to setting page to choose pool", "OK");
-                    
+
                 }
-                catch(AriesFrameworkException e)
+                catch (AriesFrameworkException e)
                 {
                     Console.WriteLine($"Error: {e.Message}");
                     loadingDialog.Hide();
@@ -158,7 +158,7 @@ namespace MyWallet.ViewModels.Notification
                     Console.WriteLine($"Error: {e.Message}");
                     loadingDialog.Hide();
                     await NavigationService.NavigateBackAsync();
-                    await Application.Current.MainPage.DisplayAlert("Error", "Unknow errow. Don't worrry, we are working on it.", "OK");                  
+                    await Application.Current.MainPage.DisplayAlert("Error", "Unknow errow. Don't worrry, we are working on it.", "OK");
                 }
             }
             //await _messageService.SendAsync<CredentialProposeMessage>()
@@ -170,26 +170,31 @@ namespace MyWallet.ViewModels.Notification
         {
             try
             {
-                var context = await _agentProvider.GetContextAsync();
-                await _credentialService.RejectOfferAsync(context, this._credentialOffer.Id);
-                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialsUpdated });
-            } 
+                var result = UserDialogs.Instance.ConfirmAsync("Are you sure you want to reject this offer?", "Confirm Rejection", "Yes", "No");
+                if (result.Result)
+                {
+                    var context = await _agentProvider.GetContextAsync();
+                    await _credentialService.RejectOfferAsync(context, this._credentialOffer.Id);
+                    await NavigationService.NavigateBackAsync();
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialsUpdated });
+                }
+            }
             catch (IndyException e)
             {
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Indy: {e.Message}");
             }
-            catch(AriesFrameworkException e)
+            catch (AriesFrameworkException e)
             {
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Aries: {e.Message}");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Xamarin: {e.Message}");
             }
-           
+
         }
 
         public ICommand AcceptCredentialOfferCommand => new Command(async () => await AcceptCredentialOffer());
