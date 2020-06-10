@@ -27,8 +27,7 @@
                       HasUnevenRows="true" 
                       IsPullToRefreshEnabled="True"
                       RefreshCommand="{Binding RefreshRecordCommand}"
-                      IsRefreshing="{Binding IsRefreshing}"
-                    
+                      IsRefreshing="{Binding IsRefreshing, Mode=OneWay}"
                       >
                 <ListView.ItemTemplate >
                     <DataTemplate >
