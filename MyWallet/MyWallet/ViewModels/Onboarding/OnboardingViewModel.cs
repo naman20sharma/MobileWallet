@@ -22,6 +22,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using FFImageLoading;
+using MyWallet.ViewModels.Connections;
 
 namespace MyWallet.ViewModels.Onboarding
 {
@@ -43,7 +45,7 @@ namespace MyWallet.ViewModels.Onboarding
             _edgeProvisioningService = edgeProvisioningService;
             _walletConfiguration = walletconfiguration;
             _options = options.Value;
-
+            
             SetSkipButtonText("SKIP");
             //SetNextButtontext("Next");
             SetNextButtonText("Create Wallet");
@@ -70,17 +72,21 @@ namespace MyWallet.ViewModels.Onboarding
             IsBusy = true;
             try
             {
-                _options.AgentName = DeviceInfo.Name + " " + AppInfo.Name;
+                _options.AgentName = string.Format($"{DeviceInfo.Name} {AppInfo.Name}");
                 _options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
                 _options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
                     key: Constants.LocalWalletCredentialKey,
                     value: Utils.Utils.GenerateRandomAsync(32));
+                dialog?.Show();
                 await _edgeProvisioningService.ProvisionAsync(_options);
                 Preferences.Set("LocalWalletProvisioned", true);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                Preferences.Set("IsRefreshing", false);
                 await NavigationService.NavigateToAsync<MainViewModel>();
                 dialog?.Hide();
                 dialog?.Dispose();
-                DialogService.Alert("Wallet created successfully", "Info", "OK");
+                dialog.TryDispose();
+                UserDialogs.Instance.Alert("Wallet created successfully", "Info", "OK");
             }
             catch (Exception ex)
             {
@@ -193,22 +199,6 @@ namespace MyWallet.ViewModels.Onboarding
                 }
             });
         }
-
-        //private void BiometricMessage(FingerprintAuthenticationResult result)
-        //{
-        //    var authMessage = new Tuple<bool, string>(false, "");
-        //    switch (result.Status)
-        //    {
-        //        case FingerprintAuthenticationResultStatus.Canceled:
-        //            var asa  = true;
-        //            var dsadhj = "";
-                    
-        //            break;
-        //        case FingerprintAuthenticationResultStatus.
-    
-        //        default:
-        //    }
-        //}
             
         private void MoveToNextPosition()
         {
@@ -257,5 +247,9 @@ namespace MyWallet.ViewModels.Onboarding
 
         public ICommand SkipCommand { get; private set; }
         public ICommand NextCommand { get; private set; }
+        public ICommand RetreiveWalletCommand => new Command(async () =>
+        {
+            await DialogService.AlertAsync("Retreive Wallet");
+        });
     }
 }
