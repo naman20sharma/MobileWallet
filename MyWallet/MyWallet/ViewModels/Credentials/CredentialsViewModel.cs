@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -77,15 +78,21 @@ namespace MyWallet.ViewModels.Credentials
                     IList<CredentialViewModel> credentialVms = new List<CredentialViewModel>();
                     foreach (var record in credentialRecordsList)
                     {
-                        //_listRecords.Add(item);
-                        //_listProofRequest.Add(item);
-                        var relatedConnection = await _connectionService.GetAsync(context, record.ConnectionId);
-                        CredentialViewModel credViewModel = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", record));
-                        credViewModel.RelatedConnection = relatedConnection;
-                        if (credViewModel.RelatedConnection.Alias.Name != null)
-                            credViewModel.OrganizeName = credViewModel.RelatedConnection.Alias.Name;
-                        //credViewModel.CredentialRecord = item;
-                        credentialVms.Add(credViewModel);
+
+                        var relatedConnection = (await _connectionService.ListConnectedConnectionsAsync(context)).Any(_ => _.Id == record.ConnectionId) ? await _connectionService.GetAsync(context, record.ConnectionId) : null;
+                        if (relatedConnection != null)
+                        {
+                            CredentialViewModel credViewModel = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", record));
+                            credViewModel.RelatedConnection = relatedConnection;
+                            if (credViewModel.RelatedConnection.Alias.Name != null)
+                                credViewModel.OrganizeName = credViewModel.RelatedConnection.Alias.Name;
+                            //credViewModel.CredentialRecord = item;
+                            credentialVms.Add(credViewModel);
+                        }
+                        else
+                        {
+                           await _credentialService.DeleteCredentialAsync(context, record.Id);
+                        }
                     }
                     _credentialVm.Clear();
                     _credentialVm.InsertRange(credentialVms);
