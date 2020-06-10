@@ -1,0 +1,10 @@
+
+*.dll
+*.pdb
+*.apk
+*.mdb
+*.class
+/MyWallet/MyWallet/bin/*
+/MyWallet/MyWallet/obj/*
+/MyWallet/MyWallet.Android/bin/*
+/MyWallet/MyWallet.Android/obj/*
