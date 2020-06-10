@@ -40,9 +40,9 @@
     <PackageReference Include="Acr.UserDialogs" Version="7.0.27" />
     <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="Hyperledger.Aries" Version="1.2.9" />
-    <PackageReference Include="Hyperledger.Aries.Routing" Version="1.2.9" />
-    <PackageReference Include="Hyperledger.Aries.Routing.Edge" Version="1.2.9" />
+    <PackageReference Include="Hyperledger.Aries" Version="1.2.11" />
+    <PackageReference Include="Hyperledger.Aries.Routing" Version="1.2.11" />
+    <PackageReference Include="Hyperledger.Aries.Routing.Edge" Version="1.2.11" />
     <PackageReference Include="MagicGradients" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Plugin.Fingerprint" Version="2.0.0-alpha.5" />
