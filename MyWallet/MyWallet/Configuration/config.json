@@ -1,5 +1,6 @@
 {
-  "Environment": "Release",
-  "AgentFrameworkEndpoint": "http://13.127.152.88:5000",
-  "PoolConfigurationName": "infyNetwork-test"
-} 
+  "Environment": "Debug",
+  "AgentFrameworkEndpoint": "http://ba376dc1c5e6.ngrok.io",
+  "PoolConfigurationName": "bcovrin-test"
+}
+  
