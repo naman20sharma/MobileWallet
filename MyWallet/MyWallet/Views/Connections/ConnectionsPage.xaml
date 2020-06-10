@@ -11,7 +11,8 @@
              mc:Ignorable="d"
              Title="{Binding Title}"
              BackgroundColor="{DynamicResource Gray-100}"
-             x:Class="MyWallet.Views.Connections.ConnectionsPage">
+             x:Class="MyWallet.Views.Connections.ConnectionsPage"
+             >
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="BooleanInverse" />
@@ -36,7 +37,6 @@
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Example Item"
-                 IsEnabled="{Binding IsEnabled}"
                  IconImageSource="qrscaning.png"
                  Command="{Binding GoToScanCommand}"
                  Order="Primary"
@@ -50,13 +50,15 @@
                     <RowDefinition Height="50" />
                     <RowDefinition Height="10" />
                 </Grid.RowDefinitions>
-                --><!--<magic:GradientView Grid.RowSpan="3">
+                -->
+            <!--<magic:GradientView Grid.RowSpan="3">
                     <magic:LinearGradient Angle="-45">
                         <magic:GradientStop Color="#281483" />
                         <magic:GradientStop Color="#8F6ED5" />
                         <magic:GradientStop Color="#D782D9" />
                     </magic:LinearGradient>
-                </magic:GradientView>--><!--
+                </magic:GradientView>-->
+            <!--
                 <yummy:PancakeView Grid.RowSpan="3" BackgroundGradientAngle="45">
                     <yummy:PancakeView.BackgroundGradientStops>
                         <yummy:GradientStopCollection>
@@ -79,7 +81,9 @@
                         Style="{StaticResource ActionBarLabelStyle}"
                         Text="{Binding Title}"
                         VerticalOptions="CenterAndExpand" />
-                    --><!--<ImageButton Margin="0,0,10,0" Command="{Binding GoToScanCommand}" BackgroundColor="Transparent" HeightRequest="45" WidthRequest="45" Padding="5"  Source="qrscaning.png" />--><!--
+                    -->
+            <!--<ImageButton Margin="0,0,10,0" Command="{Binding GoToScanCommand}" BackgroundColor="Transparent" HeightRequest="45" WidthRequest="45" Padding="5"  Source="qrscaning.png" />-->
+            <!--
 
                     <ffimageloading:CachedImage Margin="0,0,10,0"
                         VerticalOptions="Center"
@@ -101,12 +105,19 @@
             <ListView ItemsSource="{Binding Connections}" 
                       HasUnevenRows="true" 
                       IsPullToRefreshEnabled="True"
+                      CachingStrategy="RecycleElement"
                       RefreshCommand="{Binding RefreshingCommand}"
-                      IsRefreshing="{Binding RefreshingConnections, Mode=OneWay}"
+                      IsRefreshing="{Binding IsRefreshing, Mode=OneWay}"
                       >
                 <ListView.ItemTemplate >
                     <DataTemplate >
                         <ViewCell >
+                            <ViewCell.ContextActions>
+                                <MenuItem Text="Delete"
+                                          IconImageSource="trash_2.png"
+                                          Command="{Binding OnSelectDeleteMenuItem}"
+                                    />
+                            </ViewCell.ContextActions>
                             <ViewCell.View>
                                 <Frame HasShadow="true" Margin="5" Padding="0">
                                     <Grid ColumnSpacing="0" RowSpacing="0">
@@ -118,6 +129,7 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
+                                        
                                         <!--<ffimageloading:CachedImage Grid.Row="0"
                                                                     Grid.Column="0"
                                                                     Grid.RowSpan="2"
@@ -135,8 +147,8 @@
                                             </ffimageloading:CachedImage.Transformations>
                                         </ffimageloading:CachedImage>-->
                                         <StackLayout Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Padding="5" WidthRequest="5" BackgroundColor="{Binding OrganizeColor, StringFormat='#{0}'}">
-
                                         </StackLayout>
+                                        
                                         <StackLayout Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5,15,10,15">
                                             <Label HorizontalOptions="StartAndExpand" 
                                                    Margin="0,0,10,0" 
@@ -154,6 +166,7 @@
                                                Text="{Binding Path=ConnectionSubtitle}" 
                                                TextColor="{DynamicResource AppMainColorLight}"/>
                                         </StackLayout>
+                                       
                                         <StackLayout Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5,0,10,15" >
                                             <!--<Label Text="{Binding ConnectionSubtitle}"
                                                    FontFamily="{DynamicResource Montserrat-Medium}" 
