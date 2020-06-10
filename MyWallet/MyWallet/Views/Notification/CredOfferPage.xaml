@@ -77,11 +77,13 @@
                     BorderColor="{StaticResource AppMainColorLight}"
                     TextColor="White" 
                     BorderWidth="0.5"
+                    CornerRadius="10"
                     HorizontalOptions="FillAndExpand"
                     Text="Decline"/>
                 <Button                   
                     HorizontalOptions="FillAndExpand"
                     BackgroundColor="{DynamicResource AppMainColor}"
+                    CornerRadius="10"
                     TextColor="White"
                     Command="{Binding AcceptCredentialOfferCommand}"
                     Text="Accept"/>
