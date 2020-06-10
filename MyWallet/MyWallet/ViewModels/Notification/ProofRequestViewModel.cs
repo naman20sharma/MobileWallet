@@ -51,7 +51,7 @@ namespace MyWallet.ViewModels.Notification
 
             if (_proofRequestRecord.CreatedAtUtc != null)
             {
-                IssuedDate = (DateTime)_proofRequestRecord.CreatedAtUtc;
+                IssuedDate = ((DateTime)_proofRequestRecord.CreatedAtUtc).ToLocalTime();
             }
         }
 
@@ -198,6 +198,7 @@ namespace MyWallet.ViewModels.Notification
                 toastConfig.Position = ToastPosition.Top;
                 toastConfig.SetDuration(3000);
                 DialogService.Toast(toastConfig);
+                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });
             }
             catch (IndyException e)
             {
@@ -236,6 +237,7 @@ namespace MyWallet.ViewModels.Notification
                 toastConfig.Position = ToastPosition.Top;
                 toastConfig.SetDuration(3000);
                 DialogService.Toast(toastConfig);
+                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });
             }
             catch (Exception e)
             {
