@@ -1,7 +1,7 @@
 ﻿using Acr.UserDialogs;
 using Hyperledger.Aries.Agents.Edge;
 using Hyperledger.Aries.Configuration;
-using Hyperledger.Aries.Decorators.Transport;
+using Hyperledger.Aries.Routing.Mediator.Storage;
 using MyWallet.Configuration;
 using MyWallet.Extensions;
 using MyWallet.Framework.Services;
@@ -14,16 +14,13 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Security;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using FFImageLoading;
-using MyWallet.ViewModels.Connections;
+using Hyperledger.Aries.Routing;
+using Android.Bluetooth;
 
 namespace MyWallet.ViewModels.Onboarding
 {
@@ -38,6 +35,7 @@ namespace MyWallet.ViewModels.Onboarding
             INavigationService navigationService,
             IEdgeProvisioningService edgeProvisioningService,
             IWalletAppConfiguration walletconfiguration,
+            
             IOptions<AgentOptions> options) :
             base("Onboarding", userDialogs, navigationService)
         {
@@ -58,7 +56,8 @@ namespace MyWallet.ViewModels.Onboarding
 
         private async Task<FingerprintAuthenticationResult> FingerprintAuthentication()
         {
-            var authConfig = new AuthenticationRequestConfiguration("Fingerprint Authentication", "Please scan your Fingerprint for authentication. ") {
+            var authConfig = new AuthenticationRequestConfiguration("Fingerprint Authentication", "Please scan your Fingerprint for authentication. ")
+            {
                 FallbackTitle = "Use PIN",
                 CancelTitle = "Cancel",
                 AllowAlternativeAuthentication = true
@@ -71,8 +70,8 @@ namespace MyWallet.ViewModels.Onboarding
             var dialog = UserDialogs.Instance.Loading("Creating wallet");
             IsBusy = true;
             try
-            {
-                _options.AgentName = string.Format($"{DeviceInfo.Name} {AppInfo.Name}");
+            { 
+                _options.AgentName = BluetoothAdapter.DefaultAdapter.Name;
                 _options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
                 _options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
                     key: Constants.LocalWalletCredentialKey,
@@ -190,7 +189,7 @@ namespace MyWallet.ViewModels.Onboarding
                     }
                     else
                     {
-                         await this.CreateAgent();
+                        await this.CreateAgent();
                     }
                 }
                 else
@@ -199,12 +198,33 @@ namespace MyWallet.ViewModels.Onboarding
                 }
             });
         }
-            
+
         private void MoveToNextPosition()
         {
             var nextPosition = ++Position;
             Position = nextPosition;
         }
+
+        //private async void RetreiveWallet()
+        //{
+        //    try
+        //    {
+        //        IOptions<AgentOptions> options = Options.Create(_options);
+        //        IStorageService service = new DefaultStorageService(options);
+        //        //var storageService = new DefaultStorageService(options);
+        //        var mediatorConfig = await _cloudServiceClient.DiscoverConfigurationAsync(_options.EndpointUri);
+        //        var record = new InboxRecord();
+        //        record.WalletConfiguration = _options.WalletConfiguration;
+        //        record.WalletCredentials = _options.WalletCredentials;
+        //        var context = await _agentProvider.GetContextAsync();
+                
+        //        //var list_back = await service.ListBackupsAsync("Edged6af1f95c46241c5b46d11457ec87834");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.Fail(e.Message);
+        //    }
+        //}
 
         public int Position
         {
@@ -247,9 +267,10 @@ namespace MyWallet.ViewModels.Onboarding
 
         public ICommand SkipCommand { get; private set; }
         public ICommand NextCommand { get; private set; }
-        public ICommand RetreiveWalletCommand => new Command(async () =>
-        {
-            await DialogService.AlertAsync("Retreive Wallet");
-        });
+        //public ICommand RetreiveWalletCommand => new Command(async () =>
+        //{
+        //    //await DialogService.AlertAsync("Retreive Wallet");
+        //    RetreiveWallet();
+        //});
     }
 }
