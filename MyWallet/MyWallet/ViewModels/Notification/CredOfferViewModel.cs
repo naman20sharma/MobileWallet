@@ -122,8 +122,6 @@ namespace MyWallet.ViewModels.Notification
                 var loadingDialog = DialogService.Loading("Proccessing");
                 try
                 {
-                    var poolConfigName = Preferences.Get(Constants.PoolConfigurationName, "bcovrin-test");
-                    var a = await _poolService.GetPoolAsync(poolConfigName, 2);
                     var (requestMessage, credRecord) = await _credentialService.CreateRequestAsync(context, CredentialOffer.Id);
                     var connectionRecord = await _connectionService.GetAsync(context, credRecord.ConnectionId);
                     await _messageService.SendAsync(context.Wallet, requestMessage, connectionRecord);
@@ -170,8 +168,8 @@ namespace MyWallet.ViewModels.Notification
         {
             try
             {
-                var result = UserDialogs.Instance.ConfirmAsync("Are you sure you want to reject this offer?", "Confirm Rejection", "Yes", "No");
-                if (result.Result)
+                var result = await UserDialogs.Instance.ConfirmAsync("Are you sure you want to reject this offer?", "Confirm Rejection", "Yes", "No");
+                if (result)
                 {
                     var context = await _agentProvider.GetContextAsync();
                     await _credentialService.RejectOfferAsync(context, this._credentialOffer.Id);
