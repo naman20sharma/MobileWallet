@@ -6,6 +6,7 @@
     <Color x:Key="PrimaryColor">#5c6bc0</Color>
     <Color x:Key="SecondaryColor">#8e99f3</Color>
     <x:Double x:Key="BaseFontSize">16</x:Double>
+    <x:Int32 x:Key="BaseCornerRadius">10</x:Int32>
     <Color x:Key="BaseTextColor">#7b7b7b</Color>
     <Color x:Key="LightTextColor">#FFFFFF</Color>
 
@@ -66,10 +67,14 @@
                 Value="{StaticResource LightTextColor}" />
         <Setter Property="BackgroundColor" 
                 Value="{StaticResource BlueAccentColor}" />
+        <Setter Property="CornerRadius"
+                Value="{StaticResource BaseCornerRadius}" />
+        <Setter Property="HorizontalOptions"
+                Value="FillAndExpand" />
     </Style>
 
     <Style x:Key="RedButtonStyle" 
-           TargetType="Button" 
+           TargetType="Button"
            ApplyToDerivedTypes="true">
         <Setter Property="FontSize"
                 Value="{StaticResource BaseFontSize}" />
@@ -77,6 +82,10 @@
                 Value="{StaticResource LightTextColor}" />
         <Setter Property="BackgroundColor"
                 Value="{StaticResource RedAccentColor}" />
+        <Setter Property="CornerRadius"
+                Value="{StaticResource BaseCornerRadius}" />
+        <Setter Property="HorizontalOptions"
+                Value="FillAndExpand" />
     </Style>
 
     <Style x:Key="GreenButtonStyle" 
@@ -89,6 +98,8 @@
         <Setter
             Property="BackgroundColor"
             Value="{StaticResource GreenAccentColor}" />
+        <Setter Property="CornerRadius"
+                Value="{StaticResource BaseCornerRadius}"/>
     </Style>
 
     <Style x:Key="ButtonStyleBase"
@@ -98,7 +109,7 @@
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="HeightRequest" Value="32" />
-        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="Margin" Value="0" />
     </Style>
