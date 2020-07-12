@@ -18,16 +18,19 @@ using Xamarin.Forms;
 using MyWallet.Messages;
 using MyWallet.Droid.Services;
 using Plugin.LocalNotification;
-
 using FFImageLoading.Forms.Platform;
 using Plugin.Fingerprint;
 using Xamarin.Essentials;
 using Android.Webkit;
 using AndroidHUD;
+using Android.Bluetooth;
+using Xamarin.Forms.Internals;
+using Android.Provider;
+using Hyperledger.Aries.Extensions;
 
 namespace MyWallet.Droid
 {
-    [Activity(Label = "MyWallet", Icon = "@mipmap/icon", Theme = "@style/MainTheme", 
+    [Activity(Label = "MyWallet", Icon = "@mipmap/icon", Theme = "@style/MainTheme",
         MainLauncher = false, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
@@ -42,7 +45,7 @@ namespace MyWallet.Droid
             base.OnCreate(savedInstanceState);
 
             //for indicator view 
-            Xamarin.Forms.Forms.SetFlags(new string[] { "IndicatorView_Experimental" });
+            //Xamarin.Forms.Forms.SetFlags(new string[] { "IndicatorView_Experimental" });
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
@@ -60,18 +63,39 @@ namespace MyWallet.Droid
             NotificationCenter.CreateNotificationChannel(new Plugin.LocalNotification.Platform.Droid.NotificationChannelRequest()
             {
                 Sound = Resource.Raw.swiftly.ToString(),
-                VibrationPattern = new long[] {0, 1000},
-                LockscreenVisibility = NotificationVisibility.Private
-            }) ; 
+                VibrationPattern = new long[] { 0, 1000 },
+                LockscreenVisibility = NotificationVisibility.Private,
+                LightColor = Android.Graphics.Color.AliceBlue
+            });
 
-            //thinh nnd
             if ((int)Build.VERSION.SdkInt >= 23)
                 CheckAndRequestRequiredPermissions();
 
             var host = App.BuildHost(typeof(DependencyInjection.DroidServiceModule).Assembly)
               .UseContentRoot(System.Environment.GetFolderPath(
                   System.Environment.SpecialFolder.Personal)).Build();
+            
+            if (Xamarin.Essentials.DeviceInfo.DeviceType.Equals(DeviceType.Physical)
+                && !Preferences.ContainsKey("AgentName"))
+            {
+                BluetoothAdapter device = BluetoothAdapter.DefaultAdapter;
+                if (device != null)
+                {
+                    var deviceName = device.Name;
+                    int digitCount = 0;
+                    deviceName.ForEach(ch =>
+                    {
+                        if (char.IsDigit(ch))
 
+                            digitCount++;
+                    });
+                    if (digitCount >= 4 && !deviceName.Contains(" "))
+                        deviceName = Android.OS.Build.Device;
+                    Preferences.Set("AgentName", deviceName);
+                }
+            }
+            Preferences.Set("ExternalDirectoryPath", Android.OS.Environment.ExternalStorageDirectory.ToString());
+               
             try
             {
                 Console.WriteLine("CRASH_TEST - loading c++_shared");
@@ -145,12 +169,14 @@ namespace MyWallet.Droid
 
         void WireUpLongRunningTask()
         {
-            MessagingCenter.Subscribe<StartLongRunningTaskMessage>(this, "StartLongRunningTaskMessage", message => {
+            MessagingCenter.Subscribe<StartLongRunningTaskMessage>(this, "StartLongRunningTaskMessage", message =>
+            {
                 var intent = new Intent(this, typeof(LongRunningTaskService));
                 StartService(intent);
             });
 
-            MessagingCenter.Subscribe<StopLongRunningTaskMessage>(this, "StopLongRunningTaskMessage", message => {
+            MessagingCenter.Subscribe<StopLongRunningTaskMessage>(this, "StopLongRunningTaskMessage", message =>
+            {
                 var intent = new Intent(this, typeof(LongRunningTaskService));
                 StopService(intent);
             });
