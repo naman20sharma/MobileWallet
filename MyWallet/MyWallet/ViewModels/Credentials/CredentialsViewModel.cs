@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace MyWallet.ViewModels.Credentials
@@ -55,6 +56,9 @@ namespace MyWallet.ViewModels.Credentials
             _eventAggregator.GetEventByType<ApplicationEvent>()
               .Where(_ => _.Type == ApplicationEventType.CredentialsUpdated)
               .Subscribe(async _ => await LoadCredential());
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+              .Where(_ => _.Type == ApplicationEventType.ConnectionRemoved)
+              .Subscribe(async _ => await DeleteAll());
             await LoadCredential();
             IsRefreshing = false;
         }
@@ -89,10 +93,6 @@ namespace MyWallet.ViewModels.Credentials
                             //credViewModel.CredentialRecord = item;
                             credentialVms.Add(credViewModel);
                         }
-                        else
-                        {
-                           await _credentialService.DeleteCredentialAsync(context, record.Id);
-                        }
                     }
                     _credentialVm.Clear();
                     _credentialVm.InsertRange(credentialVms);
@@ -106,6 +106,39 @@ namespace MyWallet.ViewModels.Credentials
                 IsRefreshing = false;
             }
         }
+
+        /// <summary>
+        /// Deletes all the credentials sharing the same connection ID.
+        /// Function must be called if a connection is removed
+        /// </summary>
+        /// <returns></returns>
+        private async Task DeleteAll()
+        {
+            try
+            {
+                var context = await _agentProvider.GetContextAsync();
+                var credentialsList = await _credentialService.ListAsync(context);
+                var deletedConnection = Preferences.Get("DeletedConnection", null);
+                if (!credentialsList.Count.Equals(0) && deletedConnection != null)
+                {
+                    foreach (var record in credentialsList)
+                    {
+                        if (record.ConnectionId == deletedConnection)
+                        {
+                            await _credentialService.DeleteCredentialAsync(context, record.Id);
+                        }
+                    }
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
+                }
+                if (Preferences.ContainsKey("DeletedConnection"))
+                    Preferences.Remove("DeletedConnection");
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
 
         private RangeEnabledObservableCollection<CredentialViewModel> _credentialVm = new RangeEnabledObservableCollection<CredentialViewModel>();
 
