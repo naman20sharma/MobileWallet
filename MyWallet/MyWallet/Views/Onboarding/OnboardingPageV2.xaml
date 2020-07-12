@@ -26,7 +26,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
+                <!--<RowDefinition Height="auto" />-->
             </Grid.RowDefinitions>
             <!--<Button Grid.Row="0"
                     HorizontalOptions="EndAndExpand"
@@ -71,7 +71,7 @@
                     SelectedIndicatorColor="{StaticResource BlueColor}"
                     HorizontalOptions="Center"/>-->
            
-                <Label Grid.Row="1"
+                <!--<Label Grid.Row="1"
                        Text="Retreive a Wallet"
                        Padding="0,0,0,10"
                        FontSize="Medium"
@@ -80,12 +80,12 @@
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding RetreiveWalletCommand}"/>
                     </Label.GestureRecognizers>
-                </Label>
+                </Label>-->
                 <Button Margin="5"
                         CornerRadius="10"
                         BackgroundColor="{StaticResource AppMainColor}" 
                         TextColor="White" 
-                        Grid.Row="2" 
+                        Grid.Row="1" 
                         Text="{Binding NextButtonText}" 
                         Command="{Binding NextCommand}" />
             

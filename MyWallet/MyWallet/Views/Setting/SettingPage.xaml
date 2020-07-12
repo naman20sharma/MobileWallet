@@ -14,8 +14,27 @@
                 VerticalOptions="Start" 
                 HorizontalOptions="Start" />
             <!--ItemDisplayBinding="{Binding NetworkItems.Name}"-->
-            <Picker Title="Network" FontFamily="{DynamicResource Montserrat-Regular}" ItemsSource="{Binding NetworkItems}"  SelectedItem="{Binding SelectedNetworkItem, Mode=TwoWay}" x:Name="NetworkPicker"  ItemDisplayBinding="{Binding Name}" >
+            <Picker Title="Network" 
+                    FontFamily="{DynamicResource Montserrat-Regular}" 
+                    ItemsSource="{Binding NetworkItems}"  
+                    SelectedItem="{Binding SelectedNetworkItem, Mode=TwoWay}" 
+                    x:Name="NetworkPicker"
+                    ItemDisplayBinding="{Binding Name}" >
             </Picker>
+            <!--<Label Text="Backup"
+                   Margin="0,10,0,0"
+                   TextColor="{DynamicResource Key=AppMainColorLight}"/>-->
+            <!--<Button Text="Create Backup"
+                    Style="{StaticResource Key=ButtonStylePrimary}"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill"
+                    Command="{Binding CreateBackUpCommand}"
+                    />-->
+            <!--<Button Text="Restore Backup"
+                    Command="{Binding RestoreBackUpCommand}"
+                    Style="{DynamicResource Key=ButtonStyleSecondary}"/>-->
         </StackLayout>
+        
+        
     </ContentPage.Content>
 </ContentPage>

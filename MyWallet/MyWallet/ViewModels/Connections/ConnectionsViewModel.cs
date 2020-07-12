@@ -12,9 +12,7 @@ using Microsoft.Extensions.Options;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -167,7 +165,6 @@ namespace MyWallet.ViewModels.Connections
         #region Binable Command 
         public ICommand RefreshingCommand => new Command(async () => await RefreshConnectionsList());
         public ICommand GoToScanCommand => new Command(async () => await NavigationService.NavigateToAsync<ScanCodeViewModel>(null, Services.NavigationType.Modal));
-        //public ICommand GoToScanCommand => new Command(async () => await NavigationService.NavigateToAsync<ScanCodeViewModel>());
 
         public ICommand OnSelectConnectionCommand =>
             new Command<ConnectionViewModel>(async (connectionVm) =>
