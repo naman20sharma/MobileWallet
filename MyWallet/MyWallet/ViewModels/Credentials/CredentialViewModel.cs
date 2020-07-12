@@ -10,6 +10,7 @@ using MyWallet.Services.Interfaces;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -47,7 +48,7 @@ namespace MyWallet.ViewModels.Credentials
             _credentialName = ConvertNameFromeSchemaId(_credential.SchemaId).ToTitleCase();
             if (_credential.CreatedAtUtc != null)
             {
-                IssuedDate = (DateTime)_credential.CreatedAtUtc;             
+                IssuedDate = ((DateTime)_credential.CreatedAtUtc).ToLocalTime();             
             }
             someMaterialColor = new Helpers.SomeMaterialColor();
         }
@@ -116,6 +117,7 @@ namespace MyWallet.ViewModels.Credentials
                 
             }
         }
+
 
         private ConnectionRecord _relatedConnection;
 

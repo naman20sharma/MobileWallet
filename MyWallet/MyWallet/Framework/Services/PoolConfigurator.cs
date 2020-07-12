@@ -13,8 +13,8 @@ namespace MyWallet.Services
 {
     public class PoolConfigurator : IHostedService
     {
-        private readonly IPoolService poolService;
-        private readonly ILogger<PoolConfigurator> logger;
+        private readonly IPoolService _poolService;
+        private readonly ILogger<PoolConfigurator> _logger;
 
         private Dictionary<string, string> poolConfigs = new Dictionary<string, string>
         {
@@ -30,12 +30,22 @@ namespace MyWallet.Services
             IPoolService poolService,
             ILogger<PoolConfigurator> logger)
         {
-            this.poolService = poolService;
-            this.logger = logger;
+            _poolService = poolService;
+            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            var path = Preferences.Get("ExternalDirectoryPath", FileSystem.CacheDirectory);
+            string poolPath = string.Empty;
+            if(!string.IsNullOrEmpty(path))
+            {
+               poolPath = Path.Combine(path, ".indy_client", "pool");
+               if(Directory.Exists(poolPath))
+                {
+                    Directory.Delete(poolPath, true);
+                }
+            }
             foreach (var config in poolConfigs)
             {
                 try
@@ -52,7 +62,7 @@ namespace MyWallet.Services
                     }
 
                     // Create pool configuration
-                    await poolService.CreatePoolAsync(config.Key, filename)
+                    await _poolService.CreatePoolAsync(config.Key, filename)
                         .ConfigureAwait(false);
                 }
                 catch (PoolLedgerConfigExistsException)
@@ -61,8 +71,7 @@ namespace MyWallet.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogCritical(e, "Couldn't create pool config");
-                    throw;
+                    _logger.LogCritical(e, "Couldn't create pool config");
                 }
             }
         }

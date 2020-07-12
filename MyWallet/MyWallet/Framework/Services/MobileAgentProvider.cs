@@ -33,7 +33,7 @@ namespace MyWallet.Framework.Services
 
         public async Task<IAgentContext> GetContextAsync(params object[] args)
         {
-            var configurationName = Preferences.Get(Constants.PoolConfigurationName, "sovrin-staging");
+            var configurationName = Preferences.Get(Constants.PoolConfigurationName, "bcovrin-test");
             try
             {
                 var agentContext = new DefaultAgentContext

@@ -46,6 +46,7 @@ namespace MyWallet.ViewModels
             await Connections.InitializeAsync(null);
             await Credentials.InitializeAsync(null);
             await Notification.InitializeAsync(null);
+            await Setting.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
             MessagingCenter.Send(new StartLongRunningTaskMessage(), "StartLongRunningTaskMessage");
             HandleReceivedMessages();

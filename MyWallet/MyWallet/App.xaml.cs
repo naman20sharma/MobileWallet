@@ -68,6 +68,7 @@ namespace MyWallet
 
                         };
                         options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
+                        options.WalletCredentials.Key = Preferences.Get(Constants.LocalWalletCredentialKey, "DefaultKey");
                         options.ProtocolVersion = 2;
                     },
                     delayProvisioning: true));
