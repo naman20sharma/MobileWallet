@@ -1,7 +1,6 @@
 ﻿using Acr.UserDialogs;
 using Hyperledger.Aries.Agents.Edge;
 using Hyperledger.Aries.Configuration;
-using Hyperledger.Aries.Routing.Mediator.Storage;
 using MyWallet.Configuration;
 using MyWallet.Extensions;
 using MyWallet.Framework.Services;
@@ -19,8 +18,12 @@ using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using FFImageLoading;
-using Hyperledger.Aries.Routing;
-using Android.Bluetooth;
+using Hyperledger.Indy.WalletApi;
+using System.IO;
+using Newtonsoft.Json;
+using Hyperledger.Aries.Extensions;
+using System.Security.Cryptography;
+using System.Threading;
 
 namespace MyWallet.ViewModels.Onboarding
 {
@@ -35,7 +38,6 @@ namespace MyWallet.ViewModels.Onboarding
             INavigationService navigationService,
             IEdgeProvisioningService edgeProvisioningService,
             IWalletAppConfiguration walletconfiguration,
-            
             IOptions<AgentOptions> options) :
             base("Onboarding", userDialogs, navigationService)
         {
@@ -43,13 +45,13 @@ namespace MyWallet.ViewModels.Onboarding
             _edgeProvisioningService = edgeProvisioningService;
             _walletConfiguration = walletconfiguration;
             _options = options.Value;
-            
             SetSkipButtonText("SKIP");
             //SetNextButtontext("Next");
             SetNextButtonText("Create Wallet");
             InitializeOnBoarding();
             InitializeSkipCommand();
             InitializeNextCommand();
+            //InitializeRetreiveWalletCommand();
         }
 
         private void SetSkipButtonText(string skipButtonText) => SkipButtonText = skipButtonText;
@@ -70,22 +72,25 @@ namespace MyWallet.ViewModels.Onboarding
             var dialog = UserDialogs.Instance.Loading("Creating wallet");
             IsBusy = true;
             try
-            { 
-                _options.AgentName = BluetoothAdapter.DefaultAdapter.Name;
+            {
+                _options.AgentName = Preferences.Get("AgentName", DeviceInfo.Manufacturer + DeviceInfo.Name);
                 _options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
                 _options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
                     key: Constants.LocalWalletCredentialKey,
                     value: Utils.Utils.GenerateRandomAsync(32));
                 dialog?.Show();
+                
                 await _edgeProvisioningService.ProvisionAsync(_options);
                 Preferences.Set("LocalWalletProvisioned", true);
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                Preferences.Set("IsRefreshing", false);
                 await NavigationService.NavigateToAsync<MainViewModel>();
                 dialog?.Hide();
                 dialog?.Dispose();
                 dialog.TryDispose();
-                UserDialogs.Instance.Alert("Wallet created successfully", "Info", "OK");
+                var toastConfig = new ToastConfig("Successfully created wallet");
+                toastConfig.BackgroundColor = Color.Green;
+                toastConfig.Position = ToastPosition.Top;
+                toastConfig.SetDuration(3000);
+                DialogService.Toast(toastConfig);
             }
             catch (Exception ex)
             {
@@ -205,27 +210,89 @@ namespace MyWallet.ViewModels.Onboarding
             Position = nextPosition;
         }
 
-        //private async void RetreiveWallet()
-        //{
-        //    try
-        //    {
-        //        IOptions<AgentOptions> options = Options.Create(_options);
-        //        IStorageService service = new DefaultStorageService(options);
-        //        //var storageService = new DefaultStorageService(options);
-        //        var mediatorConfig = await _cloudServiceClient.DiscoverConfigurationAsync(_options.EndpointUri);
-        //        var record = new InboxRecord();
-        //        record.WalletConfiguration = _options.WalletConfiguration;
-        //        record.WalletCredentials = _options.WalletCredentials;
-        //        var context = await _agentProvider.GetContextAsync();
-                
-        //        //var list_back = await service.ListBackupsAsync("Edged6af1f95c46241c5b46d11457ec87834");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Debug.Fail(e.Message);
-        //    }
-        //}
+        private async Task RetreiveWallet()
+        {
+            Preferences.Set(Constants.PoolConfigurationName, _walletConfiguration.PoolConfigurationName);
+            var dialog = UserDialogs.Instance.Loading("Importing Wallet");
+            try
+            {
+                var externalDirectoryPath = Preferences.Get("ExternalDirectoryPath", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+                var backupPath = Path.Combine(externalDirectoryPath, ".Indy_Backups", "Export_Wallet");
+                if (!File.Exists(backupPath))
+                {
+                    dialog?.Hide();
+                    dialog?.Dispose();
+                    dialog?.TryDispose();
+                    Device.BeginInvokeOnMainThread(async() =>
+                     await DialogService.AlertAsync("Please create a new Wallet as there is no existing wallet backup.",
+                        title: "Wallet Not Found")
+                    );
+                    return;
+                }
 
+                _options.AgentName = Preferences.Get("AgentName", DeviceInfo.Manufacturer + DeviceInfo.Name);
+                _options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
+                _options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
+                    key: Constants.LocalWalletCredentialKey,
+                    value: Utils.Utils.GenerateRandomAsync(32));
+                dialog?.Show();
+                string passPhrase = "ottava swill sniggle saint ungula bombing";
+                var key = this.CreatePassphraseEncryption(passPhrase.Trim());
+                var backupConfig = new WalletBackupConfig
+                {
+                    path = backupPath,
+                    key = key
+                };
+
+                var importJson = JsonConvert.SerializeObject(backupConfig, Formatting.Indented);
+                Debug.WriteLine(importJson);
+
+
+                await Wallet.ImportAsync(_options.WalletConfiguration.ToJson(), _options.WalletCredentials.ToJson(), importConfig: importJson);
+                
+                Preferences.Set("LocalWalletProvisioned", true);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                await NavigationService.NavigateToAsync<MainViewModel>();
+                dialog?.Hide();
+                dialog?.Dispose();
+                dialog?.TryDispose();
+                await UserDialogs.Instance.AlertAsync("Wallet successfully imported", "Info");
+            }
+            catch (Exception e)
+            {
+                Debug.Fail(e.Message);
+                dialog?.Hide();
+                dialog?.Dispose();
+                DialogService.Alert("Failed to import wallet!");
+            }
+        }
+        private string CreatePassphraseEncryption(string passPhrase)
+        {
+            string hash = string.Empty;
+            using (var sha256 = SHA256.Create())
+            {
+                Debug.WriteLine($"Hash: {passPhrase.GetHashCode()} UTF8: {passPhrase.GetUTF8Bytes()}");
+                byte[] hashValue = sha256.ComputeHash(passPhrase.GetUTF8Bytes());
+                hash = hashValue.GetUTF8String();
+            }
+            return hash;
+        }
+        private void InitializeRetreiveWalletCommand()
+        {
+            RetreiveWalletCommand = new Command(async () =>
+            {
+                var res = await CrossFingerprint.Current.GetAvailabilityAsync(allowAlternativeAuthentication: true);
+                if(await CrossFingerprint.Current.IsAvailableAsync(allowAlternativeAuthentication: true))
+                {
+                    var authResult = await FingerprintAuthentication();
+                    if (authResult.Authenticated || authResult.Status.Equals(FingerprintAuthenticationResultStatus.Succeeded))
+                        await this.RetreiveWallet();
+                    else if (authResult.Status.Equals(FingerprintAuthenticationResultStatus.Failed))
+                        UserDialogs.Instance.Alert(authResult.ErrorMessage, "Info", "Ok");
+                }
+            });
+        }
         public int Position
         {
             get => position;
@@ -267,10 +334,6 @@ namespace MyWallet.ViewModels.Onboarding
 
         public ICommand SkipCommand { get; private set; }
         public ICommand NextCommand { get; private set; }
-        //public ICommand RetreiveWalletCommand => new Command(async () =>
-        //{
-        //    //await DialogService.AlertAsync("Retreive Wallet");
-        //    RetreiveWallet();
-        //});
+        public ICommand RetreiveWalletCommand { get; private set; }
     }
 }
