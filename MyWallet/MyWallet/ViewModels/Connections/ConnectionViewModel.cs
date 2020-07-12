@@ -2,18 +2,25 @@
 using Hyperledger.Aries;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Contracts;
+using Hyperledger.Aries.Features.BasicMessage;
+
 using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Aries.Features.Discovery;
+using Hyperledger.Aries.Storage;
 using MyWallet.Events;
 using MyWallet.Extensions;
 using MyWallet.Services.Interfaces;
+using Newtonsoft.Json;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace MyWallet.ViewModels.Connections
@@ -23,6 +30,7 @@ namespace MyWallet.ViewModels.Connections
         private readonly IAgentProvider _agentProvider;
         private readonly IMessageService _messageService;
         private readonly IDiscoveryService _discoveryService;
+        private readonly IWalletRecordService _walletRecordService;
         private readonly IConnectionService _connectionService;
         private readonly IEventAggregator _eventAggregator;
         Helpers.SomeMaterialColor someMaterialColor;
@@ -33,12 +41,14 @@ namespace MyWallet.ViewModels.Connections
             IMessageService messageService,
             IDiscoveryService discoveryService,
             IConnectionService connectionService,
+            IWalletRecordService walletRecordService,
             IEventAggregator eventAggregator,
-            ConnectionRecord record) : base (nameof(ConnectionsViewModel), userDialogs, navigationService)
+            ConnectionRecord record) : base(nameof(ConnectionsViewModel), userDialogs, navigationService)
         {
             _agentProvider = agentProvider;
             _messageService = messageService;
             _discoveryService = discoveryService;
+            _walletRecordService = walletRecordService;
             _connectionService = connectionService;
             _eventAggregator = eventAggregator;
             _record = record;
@@ -68,10 +78,11 @@ namespace MyWallet.ViewModels.Connections
                 try
                 {
                     var context = await _agentProvider.GetContextAsync();
-                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.DeleteAllCredentials });
                     var isDeleted = await _connectionService.DeleteAsync(context, Record.Id);
                     if (isDeleted)
                     {
+                        Preferences.Set("DeletedConnection", Record.Id);
+                        //_eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.DeleteAllCredentials });
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionRemoved });
                     }
                     else
@@ -104,6 +115,58 @@ namespace MyWallet.ViewModels.Connections
             }
         }
 
+        private async Task SendMessage()
+        {
+            try
+            {
+                //var promptResult = await DialogService.PromptAsync(new PromptConfig
+                //{
+                //    InputType = InputType.Default,
+                //    OkText = "Send",
+                //    Title = "Message",
+                //    IsCancellable = true,
+                //    Placeholder = "Message",
+                //});
+                //if (promptResult.Ok && !string.IsNullOrEmpty(promptResult.Text))
+                //{
+                var jsonObj = new
+                {
+                    type = "fetch_service",
+                    values = new Object()
+                };
+                string jsonData = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
+                Debug.WriteLine(jsonData);
+                var context = await _agentProvider.GetContextAsync();
+                var sentTime = DateTime.Now;
+                var text = jsonData;
+                var messageRecord = new BasicMessageRecord()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Direction = MessageDirection.Outgoing,
+                    Text = text,
+                    ConnectionId = Record.Id,
+                    SentTime = sentTime.ToUniversalTime()
+                };
+                var message = new BasicMessage()
+                {
+                    Content = text,
+
+                    SentTime = sentTime.ToString("s", CultureInfo.InvariantCulture)
+                };
+
+                var connection = await _connectionService.GetAsync(context, Record.Id);
+                await _walletRecordService.AddAsync(context.Wallet, messageRecord);
+                await _messageService.SendAsync(context.Wallet, message, connection);
+
+                //}
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                await DialogService.AlertAsync("Unable to send message, please try again later.", "Error");
+                throw e;
+            }
+        }
         private readonly ConnectionRecord _record;
         public ConnectionRecord Record
         {
@@ -115,11 +178,11 @@ namespace MyWallet.ViewModels.Connections
         public string ConnectionName
         {
             get => _connectionName;
-            set 
-            { 
+            set
+            {
                 this.RaiseAndSetIfChanged(ref _connectionName, value);
                 _organizeColor = someMaterialColor.GetColorFromString(_connectionName);
-                
+
             }
         }
 
@@ -189,15 +252,21 @@ namespace MyWallet.ViewModels.Connections
 
 
         #region bindable command
-        public ICommand OnSelectDeleleButtonCommad => new Command(async () => {
+        public ICommand OnSelectDeleleButtonCommad => new Command(async () =>
+        {
             var context = await _agentProvider.GetContextAsync();
         });
 
         public ICommand OnSelectDeleteMenuItem =>
            new Command(async () =>
            {
-              await  DeleteConnection();
+               await this.DeleteConnection();
            });
+        //public ICommand OnSelectSendMessageMenuItem =>
+        //   new Command(async () =>
+        //   {
+        //       await this.SendMessage();
+        //   });
         #endregion
     }
 }
