@@ -12,9 +12,7 @@ using Microsoft.Extensions.Options;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -24,6 +22,7 @@ using System.Reactive.Linq;
 using Hyperledger.Indy;
 using Hyperledger.Aries;
 using System.Diagnostics;
+using Xamarin.Essentials;
 
 namespace MyWallet.ViewModels.Connections
 {
@@ -47,7 +46,7 @@ namespace MyWallet.ViewModels.Connections
                                    IAgentProvider agentProvider,
                                    ILifetimeScope scope,
                                    IEventAggregator eventAggregator,
-                                   CloudWalletService cloudWalletService ) :
+                                   CloudWalletService cloudWalletService) :
                                    base(nameof(ConnectionsViewModel), userDialogs, navigationService)
         {
             _edgeProvisioningService = edgeProvisioningService;
@@ -59,17 +58,20 @@ namespace MyWallet.ViewModels.Connections
             _eventAggregator = eventAggregator;
             _scope = scope;
             Title = "Connections";
-            _refreshingConnections = false;
+            _IsRefreshing = false;
         }
 
         public override async Task InitializeAsync(object navigationData)
         {
-            await RefreshConnectionsList();
             _eventAggregator.GetEventByType<ApplicationEvent>()
                             .Where(_ => _.Type == ApplicationEventType.ConnectionsUpdated)
                             .Subscribe(async _ => await RefreshConnectionsList());
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                            .Where(_ => _.Type == ApplicationEventType.ConnectionRemoved)
+                            .Subscribe(async _ => await RefreshConnectionsList());
             await base.InitializeAsync(navigationData);
-            RefreshingConnections = false;
+            Preferences.Set("IsRefreshing", false);
+            await RefreshConnectionsList();
         }
 
 
@@ -77,7 +79,8 @@ namespace MyWallet.ViewModels.Connections
         {
             try
             {
-                RefreshingConnections = true;
+                IsRefreshing = true;
+                Preferences.Set("IsRefreshing", true);
                 var context = await _agentProvider.GetContextAsync();
                 if (context != null)
                 {
@@ -92,7 +95,6 @@ namespace MyWallet.ViewModels.Connections
                             var connection = _scope.Resolve<ConnectionViewModel>(new NamedParameter("record", record));
                             connectionViewModels.Add(connection);
                         }
-
                     }
 
                     Connections.Clear();
@@ -102,38 +104,45 @@ namespace MyWallet.ViewModels.Connections
                     {
                         Connections.Add(connectionVm);
                     }
-                    RefreshingConnections = false;
+                    Preferences.Set("IsRefreshing", false);
+                    IsRefreshing = false;
                 }
             }
             catch (IndyException e)
             {
-                RefreshingConnections = false;
+                IsRefreshing = false;
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Indy: {e.Message}");
             }
             catch (AriesFrameworkException e)
             {
-                RefreshingConnections = false;
+                IsRefreshing = false;
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Aries: {e.Message}");
             }
             catch (Exception e)
             {
-                RefreshingConnections = false;
+                IsRefreshing = false;
                 UserDialogs.Instance.Alert("Some error occurs. Our team is working on it.");
                 Debug.WriteLine($"Reject Error - Xamarin: {e.Message}");
             }
-            RefreshingConnections = false;
+            IsRefreshing = false;
         }
+
+
 
         #region Bindable props
 
-        private bool _refreshingConnections = false;
+        private bool _IsRefreshing = false;
 
-        public bool RefreshingConnections
+        public bool IsRefreshing
         {
-            get => _refreshingConnections;
-            set => this.RaiseAndSetIfChanged(ref _refreshingConnections, value);
+            get => _IsRefreshing;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _IsRefreshing, Preferences.Get("IsRefreshing", value));
+                Preferences.Remove("IsRefreshing");
+            }
         }
 
         private bool _hasConnections;
@@ -156,11 +165,11 @@ namespace MyWallet.ViewModels.Connections
         #region Binable Command 
         public ICommand RefreshingCommand => new Command(async () => await RefreshConnectionsList());
         public ICommand GoToScanCommand => new Command(async () => await NavigationService.NavigateToAsync<ScanCodeViewModel>(null, Services.NavigationType.Modal));
-        //public ICommand GoToScanCommand => new Command(async () => await NavigationService.NavigateToAsync<ScanCodeViewModel>());
 
-        public ICommand OnSelectConnectionCommand => 
-            new Command<ConnectionViewModel>(async (connectionVm) => {
-                if(connectionVm != null)
+        public ICommand OnSelectConnectionCommand =>
+            new Command<ConnectionViewModel>(async (connectionVm) =>
+            {
+                if (connectionVm != null)
                 {
                     await NavigationService.NavigateToAsync<ConnectionViewModel>(connectionVm);
                 }

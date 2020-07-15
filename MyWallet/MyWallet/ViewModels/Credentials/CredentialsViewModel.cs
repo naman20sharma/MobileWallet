@@ -13,9 +13,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace MyWallet.ViewModels.Credentials
@@ -54,6 +56,9 @@ namespace MyWallet.ViewModels.Credentials
             _eventAggregator.GetEventByType<ApplicationEvent>()
               .Where(_ => _.Type == ApplicationEventType.CredentialsUpdated)
               .Subscribe(async _ => await LoadCredential());
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+              .Where(_ => _.Type == ApplicationEventType.ConnectionRemoved)
+              .Subscribe(async _ => await DeleteAll());
             await LoadCredential();
             IsRefreshing = false;
         }
@@ -77,15 +82,17 @@ namespace MyWallet.ViewModels.Credentials
                     IList<CredentialViewModel> credentialVms = new List<CredentialViewModel>();
                     foreach (var record in credentialRecordsList)
                     {
-                        //_listRecords.Add(item);
-                        //_listProofRequest.Add(item);
-                        var relatedConnection = await _connectionService.GetAsync(context, record.ConnectionId);
-                        CredentialViewModel credViewModel = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", record));
-                        credViewModel.RelatedConnection = relatedConnection;
-                        if (credViewModel.RelatedConnection.Alias.Name != null)
-                            credViewModel.OrganizeName = credViewModel.RelatedConnection.Alias.Name;
-                        //credViewModel.CredentialRecord = item;
-                        credentialVms.Add(credViewModel);
+
+                        var relatedConnection = (await _connectionService.ListConnectedConnectionsAsync(context)).Any(_ => _.Id == record.ConnectionId) ? await _connectionService.GetAsync(context, record.ConnectionId) : null;
+                        if (relatedConnection != null)
+                        {
+                            CredentialViewModel credViewModel = _scope.Resolve<CredentialViewModel>(new NamedParameter("credential", record));
+                            credViewModel.RelatedConnection = relatedConnection;
+                            if (credViewModel.RelatedConnection.Alias.Name != null)
+                                credViewModel.OrganizeName = credViewModel.RelatedConnection.Alias.Name;
+                            //credViewModel.CredentialRecord = item;
+                            credentialVms.Add(credViewModel);
+                        }
                     }
                     _credentialVm.Clear();
                     _credentialVm.InsertRange(credentialVms);
@@ -99,6 +106,39 @@ namespace MyWallet.ViewModels.Credentials
                 IsRefreshing = false;
             }
         }
+
+        /// <summary>
+        /// Deletes all the credentials sharing the same connection ID.
+        /// Function must be called if a connection is removed
+        /// </summary>
+        /// <returns></returns>
+        private async Task DeleteAll()
+        {
+            try
+            {
+                var context = await _agentProvider.GetContextAsync();
+                var credentialsList = await _credentialService.ListAsync(context);
+                var deletedConnection = Preferences.Get("DeletedConnection", null);
+                if (!credentialsList.Count.Equals(0) && deletedConnection != null)
+                {
+                    foreach (var record in credentialsList)
+                    {
+                        if (record.ConnectionId == deletedConnection)
+                        {
+                            await _credentialService.DeleteCredentialAsync(context, record.Id);
+                        }
+                    }
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
+                }
+                if (Preferences.ContainsKey("DeletedConnection"))
+                    Preferences.Remove("DeletedConnection");
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
 
         private RangeEnabledObservableCollection<CredentialViewModel> _credentialVm = new RangeEnabledObservableCollection<CredentialViewModel>();
 

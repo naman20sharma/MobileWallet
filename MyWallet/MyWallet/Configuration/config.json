@@ -1,5 +1,6 @@
 {
   "Environment": "Release",
-  "AgentFrameworkEndpoint": "http://13.127.152.88:5000",
+  "AgentFrameworkEndpoint": "http://15.206.18.138:5000",
   "PoolConfigurationName": "infyNetwork-test"
-} 
+}
+  

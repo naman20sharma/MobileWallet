@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -21,6 +22,7 @@ namespace MyWallet
                 return existingValue2;
             }
             await SecureStorage.SetAsync(key, value);
+            Preferences.Set(key, value);
             return value;
         }
 

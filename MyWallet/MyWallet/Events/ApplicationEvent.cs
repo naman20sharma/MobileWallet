@@ -7,7 +7,10 @@
         CredentialsUpdated,
         GotCredentialOffer,
         GotProofRequestMessage,
-        CredentialRemoved
+        CredentialRemoved,
+        ConnectionRemoved,
+        DeleteAllCredentials,
+        NotificationUpdated
     }
     public class ApplicationEvent
     {
