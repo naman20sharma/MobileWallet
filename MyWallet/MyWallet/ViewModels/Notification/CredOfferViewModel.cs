@@ -113,7 +113,6 @@ namespace MyWallet.ViewModels.Notification
         }
         #endregion
 
-        #region Bindable Command
         private async Task AcceptCredentialOffer()
         {
             if(this.CredentialOffer != null)
@@ -192,6 +191,7 @@ namespace MyWallet.ViewModels.Notification
            
         }
 
+        #region Bindable Command
         public ICommand AcceptCredentialOfferCommand => new Command(async () => await AcceptCredentialOffer());
         public ICommand RejectCredentialOfferCommand => new Command(async () => await RejectCredentialOffer());
         #endregion
