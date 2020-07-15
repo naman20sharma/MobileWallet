@@ -17,22 +17,6 @@
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="BooleanInverse" />
             <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
-            <Style x:Key="ActionBarBackButtonStyle" TargetType="Button">
-                <Setter Property="TextColor" Value="{DynamicResource Gray-White}" />
-                <Setter Property="FontFamily" Value="{DynamicResource FontIcons}" />
-                <Setter Property="Text" Value="&#xe709;" />
-                <Setter Property="BackgroundColor" Value="Transparent" />
-                <Setter Property="HorizontalOptions" Value="Start" />
-                <Setter Property="HeightRequest" Value="34" />
-                <Setter Property="WidthRequest" Value="34" />
-                <Setter Property="Margin" Value="8" />
-                <Setter Property="Padding" Value="8" />
-            </Style>
-            <Style x:Key="ActionBarLabelStyle" TargetType="Label">
-                <Setter Property="TextColor" Value="{DynamicResource Gray-White}" />
-                <Setter Property="FontFamily" Value="{StaticResource Montserrat-Regular}" />
-                <Setter Property="FontSize" Value="20" />
-            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
@@ -44,64 +28,6 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout>
-            <!--<Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition x:Name="iOSSafeArea" Height="0" />
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="10" />
-                </Grid.RowDefinitions>
-                -->
-            <!--<magic:GradientView Grid.RowSpan="3">
-                    <magic:LinearGradient Angle="-45">
-                        <magic:GradientStop Color="#281483" />
-                        <magic:GradientStop Color="#8F6ED5" />
-                        <magic:GradientStop Color="#D782D9" />
-                    </magic:LinearGradient>
-                </magic:GradientView>-->
-            <!--
-                <yummy:PancakeView Grid.RowSpan="3" BackgroundGradientAngle="45">
-                    <yummy:PancakeView.BackgroundGradientStops>
-                        <yummy:GradientStopCollection>
-                            <yummy:GradientStop Color="#281483" Offset="1" />
-                            <yummy:GradientStop Color="#8F6ED5" Offset="0.5" />
-                            <yummy:GradientStop Color="#D782D9" Offset="0" />
-                        </yummy:GradientStopCollection>
-                    </yummy:PancakeView.BackgroundGradientStops>
-                </yummy:PancakeView>
-                <StackLayout
-                    x:Name="ActionBarContent"
-                    Grid.Row="1"
-                    HorizontalOptions="FillAndExpand"
-                    Orientation="Horizontal"
-                    VerticalOptions="FillAndExpand">
-
-                    <Label
-                        Margin="10,0,0,0"
-                        HorizontalOptions="StartAndExpand"
-                        Style="{StaticResource ActionBarLabelStyle}"
-                        Text="{Binding Title}"
-                        VerticalOptions="CenterAndExpand" />
-                    -->
-            <!--<ImageButton Margin="0,0,10,0" Command="{Binding GoToScanCommand}" BackgroundColor="Transparent" HeightRequest="45" WidthRequest="45" Padding="5"  Source="qrscaning.png" />-->
-            <!--
-
-                    <ffimageloading:CachedImage Margin="0,0,10,0"
-                        VerticalOptions="Center"
-                        HeightRequest="36"
-                        WidthRequest="36"
-                        FadeAnimationEnabled="true"
-                        DownsampleUseDipUnits="true"
-                        Aspect="Fill"                   
-                        Source="qrscaning.png">
-                        <ffimageloading:CachedImage.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToScanCommand}"
-                                NumberOfTapsRequired="1" />
-                        </ffimageloading:CachedImage.GestureRecognizers>
-                    </ffimageloading:CachedImage>
-                </StackLayout>
-                <yummy:PancakeView Grid.Row="2" BackgroundColor="{DynamicResource Gray-100}" CornerRadius="0" HorizontalOptions="FillAndExpand" HeightRequest="10">
-                </yummy:PancakeView>
-            </Grid>-->
             <ListView ItemsSource="{Binding Connections}" 
                       HasUnevenRows="true" 
                       IsPullToRefreshEnabled="True"
