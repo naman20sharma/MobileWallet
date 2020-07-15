@@ -177,7 +177,7 @@
 
                                             <Label Margin="0,0,0,0" 
                                                Padding="0" 
-                                               FontSize="12" 
+                                               FontSize="12"
                                                TextColor="{DynamicResource Gray-700}"  
                                                Text="{Binding Path=CreatedDate, StringFormat='{0:dd-MM-yyyy}'}" />
                                         </StackLayout>
