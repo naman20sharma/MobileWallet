@@ -59,7 +59,7 @@ namespace MyWallet.ViewModels.Connections
             ConnectionName = _record.Alias.Name;
             ConnectionSubtitle = $"{_record.State:G}";
             Title = "Connection Detail";
-            if (this._connectionImageUrl == null)
+            if (_record.Alias.ImageUrl == null)
                 _connectionImageUrl = $"https://ui-avatars.com/api/?name={_connectionName}&length=1&background={_organizeColor}&color=fff&size=128";
             else
                 _connectionImageUrl = _record.Alias.ImageUrl;
