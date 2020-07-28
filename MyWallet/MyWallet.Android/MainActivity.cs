@@ -78,24 +78,26 @@ namespace MyWallet.Droid
             if (Xamarin.Essentials.DeviceInfo.DeviceType.Equals(DeviceType.Physical)
                 && !Preferences.ContainsKey("AgentName"))
             {
-                BluetoothAdapter device = BluetoothAdapter.DefaultAdapter;
-                if (device != null)
+                using (var device = BluetoothAdapter.DefaultAdapter)
                 {
-                    var deviceName = device.Name;
-                    int digitCount = 0;
-                    deviceName.ForEach(ch =>
+                    if (device != null)
                     {
-                        if (char.IsDigit(ch))
+                        var deviceName = device.Name;
+                        int digitCount = 0;
+                        deviceName.ForEach(ch =>
+                        {
+                            if (char.IsDigit(ch))
 
-                            digitCount++;
-                    });
-                    if (digitCount >= 4 && !deviceName.Contains(" "))
-                        deviceName = Android.OS.Build.Device;
-                    Preferences.Set("AgentName", deviceName);
+                                digitCount++;
+                        });
+                        if (digitCount >= 4 && !deviceName.Contains(" "))
+                            deviceName = Android.OS.Build.Device;
+                        Preferences.Set("AgentName", deviceName);
+                    }
                 }
             }
             Preferences.Set("ExternalDirectoryPath", Android.OS.Environment.ExternalStorageDirectory.ToString());
-               
+
             try
             {
                 Console.WriteLine("CRASH_TEST - loading c++_shared");
@@ -104,8 +106,8 @@ namespace MyWallet.Droid
             catch (Java.Lang.UnsatisfiedLinkError e)
             {
                 Console.WriteLine("CRASH_TEST - " + e.Message);
-                Console.WriteLine("CRASH_TEST - lgnustl_shared");
-                JavaSystem.LoadLibrary("gnustl_shared");
+                Console.WriteLine("CRASH_TEST - indy_shared");
+                JavaSystem.LoadLibrary("indy_shared");
             }
             Console.WriteLine("CRASH_TEST - indy");
             JavaSystem.LoadLibrary("indy");
