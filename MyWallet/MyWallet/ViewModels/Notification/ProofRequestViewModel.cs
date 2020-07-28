@@ -211,7 +211,7 @@ namespace MyWallet.ViewModels.Notification
                 await NavigationService.NavigateBackAsync();
                 var toastConfig = new ToastConfig("Accepted Proof!");
                 toastConfig.BackgroundColor = Color.Green;
-                toastConfig.Position = ToastPosition.Top;
+                toastConfig.Position = ToastPosition.Bottom;
                 toastConfig.SetDuration(3000);
                 DialogService.Toast(toastConfig);
             }
@@ -255,7 +255,7 @@ namespace MyWallet.ViewModels.Notification
                 this.IsBusy = false;
                 var toastConfig = new ToastConfig("Rejected successfully!");
                 toastConfig.BackgroundColor = Color.Green;
-                toastConfig.Position = ToastPosition.Top;
+                toastConfig.Position = ToastPosition.Bottom;
                 toastConfig.SetDuration(3000);
                 DialogService.Toast(toastConfig);
                 _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });

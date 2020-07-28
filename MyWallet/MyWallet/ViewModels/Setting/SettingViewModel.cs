@@ -86,7 +86,7 @@ namespace MyWallet.ViewModels.Setting
                 dialog?.TryDispose();
                 var toastConfig = new ToastConfig("Wallet Backed up successfully!");
                 toastConfig.BackgroundColor = Color.Green;
-                toastConfig.Position = ToastPosition.Top;
+                toastConfig.Position = ToastPosition.Bottom;
                 toastConfig.SetDuration(TimeSpan.FromSeconds(3));
                 DialogService.Toast(toastConfig);
             }
