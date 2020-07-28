@@ -64,7 +64,7 @@ namespace MyWallet.ViewModels.Connections
                     await NavigationService.CloseAllPopupsAsync();
                     var toastConfig = new ToastConfig("Connection Saved!");
                     toastConfig.BackgroundColor = Color.Green;
-                    toastConfig.Position = ToastPosition.Top;
+                    toastConfig.Position = ToastPosition.Bottom;
                     toastConfig.SetDuration(3000);
                     DialogService.Toast(toastConfig);
                     _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionsUpdated });
