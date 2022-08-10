@@ -95,7 +95,7 @@
                 <Button Command="{Binding AcceptProofRequestCommand}" IsEnabled="False"                    
                     CornerRadius="2"
                     HorizontalOptions="FillAndExpand"
-                    Style="{DynamicResource BlueButtonStyle}"   
+                    Style="{DynamicResource BlueButtonStyle}"   r
                     Text="Present"/>
             </StackLayout>
         </Grid>

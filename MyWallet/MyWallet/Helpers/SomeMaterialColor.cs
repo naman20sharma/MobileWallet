@@ -33,7 +33,7 @@ namespace MyWallet.Helpers
         public string GetColorFromString(string s)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(s);
-            int a = BitConverter.ToInt32(bytes, 0);
+            int a = bytes.Length < 4 ? BitConverter.ToInt16(bytes, 0) : BitConverter.ToInt32(bytes, 0);
             return colors[a%(colors.Count)];
         }
         public SomeMaterialColor()

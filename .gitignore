@@ -4,7 +4,9 @@
 *.apk
 *.mdb
 *.class
-/MyWallet/MyWallet.Android/bin/*
-/MyWallet/MyWallet.Android/obj/*
 /MyWallet/MyWallet/bin/*
 /MyWallet/MyWallet/obj/*
+/MyWallet/MyWallet.Android/bin/*
+/MyWallet/MyWallet.Android/obj/*
+.vs/MyWallet/v16/.suo
+

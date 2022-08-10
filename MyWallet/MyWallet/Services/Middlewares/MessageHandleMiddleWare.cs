@@ -52,7 +52,7 @@ namespace MyWallet.Services.Middlewares
                         return "A new Connection available, Tap here to view";
                     }
                 default:
-                    return "You've got a message from mediator";
+                    return string.Empty;
             }
         }
 
@@ -61,6 +61,8 @@ namespace MyWallet.Services.Middlewares
             // _credentialService.ListAsync(agentContext);
             var messageType = messageContext.GetMessageType();
             var content = HandleMessageTypeEventAndNotification(messageType);
+            if (content.Equals(string.Empty))
+                return;
             var notification = new NotificationRequest
             {
                 Android = new AndroidOptions()
@@ -68,10 +70,11 @@ namespace MyWallet.Services.Middlewares
                 NotificationId = 101,
                 Title = "Mediator",
                 Description = content,
-                ReturningData = "Dummy data", // Returning data when tapped on notification.
+                ReturningData = content, // Returning data when tapped on notification.
             };
             if (messageType.Equals(MessageTypes.BasicMessageType))
             {
+
                 notification.Description = String.Format($"{content} : {Environment.NewLine} {(messageContext.ContextRecord as BasicMessageRecord).Text}");
             }
             NotificationCenter.Current.Show(notification);

@@ -24,7 +24,6 @@
     <ContentPage.Content>
         <Grid>
             <Grid.RowDefinitions>
-                <!--<RowDefinition Height="auto" />-->
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
@@ -58,7 +57,7 @@
                                        WidthRequest="300" 
                                        FlexLayout.AlignSelf="Center"/>
                                 <Label Text="{Binding Content}"
-                                       FontSize="Subtitle" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Padding="10"/>
+                                       FontSize="Subtitle" Padding="10,0,10,0"/>
                             </FlexLayout>
                         </ContentView>
                     </DataTemplate>

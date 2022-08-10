@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
@@ -18,7 +18,6 @@ using Xamarin.Forms;
 using MyWallet.Messages;
 using MyWallet.Droid.Services;
 using Plugin.LocalNotification;
-
 using FFImageLoading.Forms.Platform;
 using Plugin.Fingerprint;
 using Xamarin.Essentials;
@@ -26,10 +25,14 @@ using Android.Webkit;
 using AndroidHUD;
 using Android.Systems;
 using Plugin.PushNotification;
+using Android.Bluetooth;
+using Xamarin.Forms.Internals;
+using Android.Provider;
+using Hyperledger.Aries.Extensions;
 
 namespace MyWallet.Droid
 {
-    [Activity(Label = "MyWallet", Icon = "@mipmap/icon", Theme = "@style/MainTheme", 
+    [Activity(Label = "MyWallet", Icon = "@mipmap/icon", Theme = "@style/MainTheme",
         MainLauncher = false, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
@@ -44,7 +47,7 @@ namespace MyWallet.Droid
             base.OnCreate(savedInstanceState);
 
             //for indicator view 
-            Xamarin.Forms.Forms.SetFlags(new string[] { "IndicatorView_Experimental" });
+            //Xamarin.Forms.Forms.SetFlags(new string[] { "IndicatorView_Experimental" });
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
@@ -59,6 +62,7 @@ namespace MyWallet.Droid
             // Initializing FFImageLoading
             CachedImageRenderer.Init(false);
 
+
             //NotificationCenter.CreateNotificationChannel(new Plugin.LocalNotification.Platform.Droid.NotificationChannelRequest()
             //{
             //    Sound = Resource.Raw.swiftly.ToString(),
@@ -67,12 +71,36 @@ namespace MyWallet.Droid
             //}) ;
             //setupPushNotification();
             //thinh nnd
+            
             if ((int)Build.VERSION.SdkInt >= 23)
                 CheckAndRequestRequiredPermissions();
 
             var host = App.BuildHost(typeof(DependencyInjection.DroidServiceModule).Assembly)
               .UseContentRoot(System.Environment.GetFolderPath(
                   System.Environment.SpecialFolder.Personal)).Build();
+            
+            if (Xamarin.Essentials.DeviceInfo.DeviceType.Equals(DeviceType.Physical)
+                && !Preferences.ContainsKey("AgentName"))
+            {
+                using (var device = BluetoothAdapter.DefaultAdapter)
+                {
+                    if (device != null)
+                    {
+                        var deviceName = device.Name;
+                        int digitCount = 0;
+                        deviceName.ForEach(ch =>
+                        {
+                            if (char.IsDigit(ch))
+
+                                digitCount++;
+                        });
+                        if (digitCount >= 4 && !deviceName.Contains(" "))
+                            deviceName = Android.OS.Build.Device;
+                        Preferences.Set("AgentName", deviceName);
+                    }
+                }
+            }
+            Preferences.Set("ExternalDirectoryPath", Android.OS.Environment.ExternalStorageDirectory.ToString());
 
             Os.Setenv("EXTERNAL_STORAGE", FileSystem.AppDataDirectory, true);
 
@@ -84,8 +112,8 @@ namespace MyWallet.Droid
             catch (Java.Lang.UnsatisfiedLinkError e)
             {
                 Console.WriteLine("CRASH_TEST - " + e.Message);
-                Console.WriteLine("CRASH_TEST - lgnustl_shared");
-                JavaSystem.LoadLibrary("gnustl_shared");
+                Console.WriteLine("CRASH_TEST - indy_shared");
+                JavaSystem.LoadLibrary("indy_shared");
             }
             Console.WriteLine("CRASH_TEST - indy");
             JavaSystem.LoadLibrary("indy");
@@ -172,12 +200,14 @@ namespace MyWallet.Droid
 
         void WireUpLongRunningTask()
         {
-            MessagingCenter.Subscribe<StartLongRunningTaskMessage>(this, "StartLongRunningTaskMessage", message => {
+            MessagingCenter.Subscribe<StartLongRunningTaskMessage>(this, "StartLongRunningTaskMessage", message =>
+            {
                 var intent = new Intent(this, typeof(LongRunningTaskService));
                 StartService(intent);
             });
 
-            MessagingCenter.Subscribe<StopLongRunningTaskMessage>(this, "StopLongRunningTaskMessage", message => {
+            MessagingCenter.Subscribe<StopLongRunningTaskMessage>(this, "StopLongRunningTaskMessage", message =>
+            {
                 var intent = new Intent(this, typeof(LongRunningTaskService));
                 StopService(intent);
             });

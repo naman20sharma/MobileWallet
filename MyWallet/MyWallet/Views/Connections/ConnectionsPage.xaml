@@ -17,22 +17,6 @@
         <ResourceDictionary>
             <converters:InverseBooleanConverter x:Key="BooleanInverse" />
             <converters:SelecteditemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
-            <Style x:Key="ActionBarBackButtonStyle" TargetType="Button">
-                <Setter Property="TextColor" Value="{DynamicResource Gray-White}" />
-                <Setter Property="FontFamily" Value="{DynamicResource FontIcons}" />
-                <Setter Property="Text" Value="&#xe709;" />
-                <Setter Property="BackgroundColor" Value="Transparent" />
-                <Setter Property="HorizontalOptions" Value="Start" />
-                <Setter Property="HeightRequest" Value="34" />
-                <Setter Property="WidthRequest" Value="34" />
-                <Setter Property="Margin" Value="8" />
-                <Setter Property="Padding" Value="8" />
-            </Style>
-            <Style x:Key="ActionBarLabelStyle" TargetType="Label">
-                <Setter Property="TextColor" Value="{DynamicResource Gray-White}" />
-                <Setter Property="FontFamily" Value="{StaticResource Montserrat-Regular}" />
-                <Setter Property="FontSize" Value="16" />
-            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
@@ -175,43 +159,11 @@
 
                                             <Label Margin="0,0,0,0" 
                                                Padding="0" 
-                                               FontSize="12" 
+                                               FontSize="12"
                                                TextColor="{DynamicResource Gray-700}"  
                                                Text="{Binding Path=CreatedDate, StringFormat='{0:dd-MM-yyyy}'}" />
                                         </StackLayout>
                                     </Grid>
-
-                                    <!--<StackLayout Spacing="10" Padding="10,5" VerticalOptions="CenterAndExpand" >
-                                        <StackLayout Orientation="Horizontal" Margin="0,0,0,10">
-                                            <Label HorizontalOptions="StartAndExpand" 
-                                                   Margin="0,0,10,0" 
-                                                   Padding="0" 
-                                                   FontFamily="{DynamicResource Montserrat-SemiBold}" 
-                                                   TextColor="{DynamicResource Gray-900}"
-                                                   FontSize="Default"
-                                                   Text="{Binding Path=CredentialName}" />
-                                            <Label Margin="10,0,0,0"
-                                               FontSize="Body"
-                                               HorizontalOptions="End"
-                                               HorizontalTextAlignment="End"
-                                               FontFamily="{DynamicResource Montserrat-Regular}"
-                                               Text="{Binding Path=State}" 
-                                               TextColor="{DynamicResource AppMainColorLight}"/>
-                                        </StackLayout>
-                                        <StackLayout Orientation="Horizontal" >
-                                            <Label Text="{Binding OrganizeName}"
-                                                   FontFamily="{DynamicResource Montserrat-Medium}" 
-                                                   FontSize="14" 
-                                                   HorizontalOptions="StartAndExpand"/>
-
-                                            <Label Margin="0,0,10,0" 
-                                               Padding="0" 
-                                               FontSize="12" 
-                                               TextColor="{DynamicResource Gray-700}"  
-                                               Text="{Binding Path=IssuedDate, StringFormat='{}{0:dd MMM yyyy}'}" />
-                                        </StackLayout>
-
-                                    </StackLayout>-->
                                 </Frame>
                             </ViewCell.View>
                         </ViewCell>

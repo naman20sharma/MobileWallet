@@ -15,8 +15,7 @@ namespace MyWallet.Droid.Services
 	{
 		CancellationTokenSource _cts;
 
-		private CloudWalletService _cloudWalletService;
-		public LongRunningTaskService()
+        public LongRunningTaskService()
 		{
 
 		}

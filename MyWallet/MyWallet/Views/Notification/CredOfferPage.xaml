@@ -85,6 +85,7 @@
                     BackgroundColor="{DynamicResource AppMainColor}"
                     CornerRadius="2"
                     TextColor="White"
+
                     Command="{Binding AcceptCredentialOfferCommand}"
                     Text="Accept"/>
             </StackLayout>

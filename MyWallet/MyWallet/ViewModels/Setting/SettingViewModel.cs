@@ -5,6 +5,7 @@ using Hyperledger.Aries.Routing;
 using Hyperledger.Aries.Storage;
 using MyWallet.Extensions;
 using MyWallet.Models.Setting;
+using MyWallet.Configuration;
 using MyWallet.Services.Interfaces;
 using ReactiveUI;
 using System;
@@ -52,9 +53,67 @@ namespace MyWallet.ViewModels.Setting
 
         public override async Task InitializeAsync(object navigationData)
         {
-
             await base.InitializeAsync(navigationData);
         }
+
+        private string CreatePassphraseEncryption(string passPhrase)
+        {
+            string hash = string.Empty;
+            using (var sha256 = SHA256.Create())
+            {
+                Debug.WriteLine($"Hash: {passPhrase.GetHashCode()} UTF8: {passPhrase.GetUTF8Bytes()}");
+                byte[] hashValue = sha256.ComputeHash(passPhrase.GetUTF8Bytes());
+                hash = hashValue.GetUTF8String();
+            }
+            return hash;
+        }
+           
+        //private async Task RestoreBackup()
+        //{
+        //    try
+        //    {
+        //        var context = await _agentProvider.GetContextAsync();
+        //        string seed = "00000000000000000000000000000000";
+        //        Debug.WriteLine($"Wallet is Open: {context.Wallet.IsOpen}\n Key: {_agentOptions.WalletCredentials.Key}\n" +
+        //            $"Key Derivation: {_agentOptions.WalletCredentials.KeyDerivationMethod}\n Storage Credentials:{_agentOptions.WalletCredentials.StorageCredentials}");
+        //        await Task.Delay(TimeSpan.FromSeconds(1));
+        //        var backups = await _edgeClientService.ListBackupsAsync(context);
+        //        var attachments = await _edgeClientService.RetrieveBackupAsync(context, seed);
+                
+        //        await _edgeClientService.RestoreFromBackupAsync(context, seed);
+                
+        //        await NavigationService.NavigateToAsync<MainViewModel>();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.WriteLine(e);
+        //        await DialogService.AlertAsync($"Unable to Restore the wallet, Wallet is opened already.");
+        //    }
+        //}
+
+        //private async Task CheckBackup()
+        //{
+        //    try
+        //    {
+        //        var context = await _agentProvider.GetContextAsync();
+        //        string seed = "00000000000000000000000000000000";
+        //        Debug.WriteLine($"Wallet is Open: {context.Wallet.IsOpen}\n Key: {_agentOptions.WalletCredentials.Key}\n" +
+        //            $"Key Derivation: {_agentOptions.WalletCredentials.KeyDerivationMethod}\n Storage Credentials:{_agentOptions.WalletCredentials.StorageCredentials}");
+        //        await Task.Delay(TimeSpan.FromSeconds(1));
+        //        var backups = await _edgeClientService.ListBackupsAsync(context);
+        //        var provisionRecord = await _provisioningService.GetProvisioningAsync(context.Wallet);
+                
+        //        var attachments = await _edgeClientService.RetrieveBackupAsync(context, seed);
+        //        Debug.WriteLine($"ID: {attachments[0].Id}\n{attachments[0].Filename}");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.WriteLine(e);
+        //        throw e;
+        //    }
+        //}
+
+        #region Bindable Properties
 
         private NetworkItem _selectedNetworkItem;
 
@@ -63,8 +122,11 @@ namespace MyWallet.ViewModels.Setting
             get => _selectedNetworkItem;
             set
             {
-                this.RaiseAndSetIfChanged(ref _selectedNetworkItem, value);
-                Preferences.Set("PoolConfigurationName", _selectedNetworkItem.PoolName);
+                if (value != null)
+                {
+                    this.RaiseAndSetIfChanged(ref _selectedNetworkItem, value);
+                    Preferences.Set("PoolConfigurationName", _selectedNetworkItem.PoolName);
+                }
             }
         }
 
@@ -75,6 +137,7 @@ namespace MyWallet.ViewModels.Setting
             get => this._networkItems;
             set => this.RaiseAndSetIfChanged(ref _networkItems, value);
         }
+        #endregion
 
         private async Task CreateBackup()
         {

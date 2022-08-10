@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Core;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Routing;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,11 @@ namespace MyWallet.Framework.Services
 {
     public class CloudWalletService
     {
+        private static readonly SemaphoreSlim slim = new SemaphoreSlim(1, 1);
+        private readonly IAgentProvider agentProvider;
+        private readonly ILogger<CloudWalletService> logger;
+        private readonly IEdgeClientService serviceClient;
+
         public CloudWalletService(
             IAgentProvider agentProvider,
             IEdgeClientService cloudServiceClient,
@@ -22,11 +28,6 @@ namespace MyWallet.Framework.Services
             this.logger = logger;
             this.serviceClient = cloudServiceClient;
         }
-
-        private static readonly SemaphoreSlim slim = new SemaphoreSlim(1, 1);
-        private readonly IAgentProvider agentProvider;
-        private readonly ILogger<CloudWalletService> logger;
-        private readonly IEdgeClientService serviceClient;
 
         public async Task<int> FetchCloudMessagesAsync()
         {
