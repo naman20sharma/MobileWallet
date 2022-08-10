@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Routing;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace MyWallet.Framework.Services
 {
@@ -30,11 +31,14 @@ namespace MyWallet.Framework.Services
         public async Task<int> FetchCloudMessagesAsync()
         {
             var messageCount = 0;
+            
             try
             {
                 await slim.WaitAsync();
-                await serviceClient.FetchInboxAsync(await agentProvider.GetContextAsync())
+                var inbox = await serviceClient.FetchInboxAsync(await agentProvider.GetContextAsync())
                     .ConfigureAwait(false);
+                messageCount = inbox.processedCount;
+                var unprocesedItems = inbox.unprocessedItems;
             }
             catch (Exception e)
             {

@@ -20,7 +20,7 @@ namespace MyWallet.Services
         {
             //{ "sovrin-live", "pool_transactions_live_genesis" },
             //{ "sovrin-builder", "pool_transactions_builder_genesis" },
-            //{ "sovrin-staging", "pool_transactions_sandbox_genesis" },
+            { "sovrin-staging", "pool_transactions_sandbox_genesis" },
             { "bcovrin-dev", "pool_transactions_bcovrin_dev_genesis" },
             { "bcovrin-test", "pool_transactions_bcovrin_test_genesis" },
             { "infyNetwork-test", "pool_transactions_infyNetwork_test_genesis" }
@@ -41,7 +41,8 @@ namespace MyWallet.Services
                 try
                 {
                     // Path for bundled genesis txn
-                    var filename = Path.Combine(FileSystem.CacheDirectory, "genesis.txn");
+                    var filesDir = FileSystem.AppDataDirectory;
+                    var filename = Path.Combine(filesDir, config.Value);
 
                     // Dump file contents to cached filename
                     using (var stream = await FileSystem.OpenAppPackageFileAsync(config.Value))
@@ -62,7 +63,7 @@ namespace MyWallet.Services
                 catch (Exception e)
                 {
                     logger.LogCritical(e, "Couldn't create pool config");
-                    throw;
+                    //throw;
                 }
             }
         }

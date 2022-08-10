@@ -22,6 +22,13 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using FFImageLoading;
+using MyWallet.ViewModels.Connections;
+using Autofac;
+using Hyperledger.Aries.Agents;
+using Hyperledger.Aries.Routing;
+using Hyperledger.Indy.WalletApi;
+using Hyperledger.Aries.Storage;
 
 namespace MyWallet.ViewModels.Onboarding
 {
@@ -30,20 +37,27 @@ namespace MyWallet.ViewModels.Onboarding
         private int position;
         private readonly IEdgeProvisioningService _edgeProvisioningService;
         private readonly IWalletAppConfiguration _walletConfiguration;
-        private readonly AgentOptions _options;
-
+        private readonly IEdgeClientService _edgeClientService;
+        private AgentOptions _options;
+        private readonly IAgentProvider _agentProvider;
+        private readonly ILifetimeScope _scope;
         public OnboardingViewModel(IUserDialogs userDialogs,
+            IEdgeClientService edgeClientService,
             INavigationService navigationService,
             IEdgeProvisioningService edgeProvisioningService,
+            IAgentProvider agentProvider,
+            ILifetimeScope scope,
             IWalletAppConfiguration walletconfiguration,
             IOptions<AgentOptions> options) :
             base("Onboarding", userDialogs, navigationService)
         {
             //services
             _edgeProvisioningService = edgeProvisioningService;
+            _edgeClientService = edgeClientService;
             _walletConfiguration = walletconfiguration;
             _options = options.Value;
-
+            _agentProvider = agentProvider;
+            _scope = scope;
             SetSkipButtonText("SKIP");
             //SetNextButtontext("Next");
             SetNextButtonText("Create Wallet");
@@ -56,7 +70,8 @@ namespace MyWallet.ViewModels.Onboarding
 
         private async Task<FingerprintAuthenticationResult> FingerprintAuthentication()
         {
-            var authConfig = new AuthenticationRequestConfiguration("Fingerprint Authentication", "Please scan your Fingerprint for authentication. ") {
+            var authConfig = new AuthenticationRequestConfiguration("Fingerprint Authentication", "Please scan your Fingerprint for authentication. ")
+            {
                 FallbackTitle = "Use PIN",
                 CancelTitle = "Cancel",
                 AllowAlternativeAuthentication = true
@@ -70,17 +85,25 @@ namespace MyWallet.ViewModels.Onboarding
             IsBusy = true;
             try
             {
-                _options.AgentName = DeviceInfo.Name + " " + AppInfo.Name;
+                _options.AgentName = string.Format($"{DeviceInfo.Name} {AppInfo.Name}");
+                Preferences.Set("AgentName", _options.AgentName);
                 _options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
                 _options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
                     key: Constants.LocalWalletCredentialKey,
                     value: Utils.Utils.GenerateRandomAsync(32));
+                dialog?.Show();
+                Preferences.Set("WalletConfigurationId", _options.WalletConfiguration.Id);
+                Preferences.Set("WalletCredentialId", _options.WalletCredentials.Key);
                 await _edgeProvisioningService.ProvisionAsync(_options);
                 Preferences.Set("LocalWalletProvisioned", true);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                Preferences.Set("IsRefreshing", false);
+                MessagingCenter.Send<OnboardingViewModel>(this, "SetupPushNotification");
                 await NavigationService.NavigateToAsync<MainViewModel>();
                 dialog?.Hide();
                 dialog?.Dispose();
-                DialogService.Alert("Wallet created successfully", "Info", "OK");
+                dialog.TryDispose();
+                UserDialogs.Instance.Alert("Wallet created successfully", "Info", "OK");
             }
             catch (Exception ex)
             {
@@ -184,7 +207,7 @@ namespace MyWallet.ViewModels.Onboarding
                     }
                     else
                     {
-                         await this.CreateAgent();
+                        await this.CreateAgent();
                     }
                 }
                 else
@@ -202,14 +225,14 @@ namespace MyWallet.ViewModels.Onboarding
         //        case FingerprintAuthenticationResultStatus.Canceled:
         //            var asa  = true;
         //            var dsadhj = "";
-                    
+
         //            break;
         //        case FingerprintAuthenticationResultStatus.
-    
+
         //        default:
         //    }
         //}
-            
+
         private void MoveToNextPosition()
         {
             var nextPosition = ++Position;
@@ -254,6 +277,71 @@ namespace MyWallet.ViewModels.Onboarding
                 SetNextButtonText("Next");
             }
         }
+        private string ConvertStringtoMD5(string strword)
+        {
+            MD5 md5 = MD5.Create();
+            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(strword);
+            byte[] hash = md5.ComputeHash(inputBytes);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
+
+        private async Task RestoreBackup()
+        {
+            var dialog = UserDialogs.Instance.Loading("Restoring wallet");
+            try
+            {
+                //AgentOptions options = new AgentOptions();
+                Preferences.Set(Constants.PoolConfigurationName, _walletConfiguration.PoolConfigurationName);
+                //_options.AgentName = string.Format($"{DeviceInfo.Name} {AppInfo.Name}");
+                //_options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
+                //_options.WalletCredentials.Key = await SyncedSecureStorage.GetOrCreateSecureAsync(
+                //    key: Constants.LocalWalletCredentialKey,
+                //    value: Utils.Utils.GenerateRandomAsync(32));
+                ////options.EndpointUri = _walletConfiguration.AgentFrameworkEndpoint;
+                dialog?.Show();
+                //await Wallet.CreateWalletAsync(_options.WalletConfiguration.ToString(), _options.WalletCredentials.ToString());
+                await _edgeProvisioningService.ProvisionAsync();
+                var context = await _scope.Resolve<IAgentProvider>().GetContextAsync();
+                //var context = await _agentProvider.GetContextAsync();
+                string passPhrase = "ottava swill sniggle saint ungula bombing";
+                var seed = this.ConvertStringtoMD5(passPhrase);
+                var agentOptions = await _edgeClientService.RestoreFromBackupAsync(context, seed: seed);
+                var wallet = await _scope.Resolve<IWalletService>().GetWalletAsync(agentOptions.WalletConfiguration, agentOptions.WalletCredentials);
+                //await Wallet.OpenWalletAsync(agentOptions.WalletConfiguration.ToString(), agentOptions.WalletCredentials.ToString());
+                _options = agentOptions;
+                //await _edgeProvisioningService.ProvisionAsync(agentOptions);
+                //_options = agentOptions;
+                Preferences.Set("WalletConfigurationId", agentOptions.WalletConfiguration.Id);
+                Preferences.Set("WalletCredentialId", agentOptions.WalletCredentials.Key);
+                System.Diagnostics.Debug.WriteLine(agentOptions);
+                Preferences.Set("LocalWalletProvisioned", true);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                Preferences.Set("IsRefreshing", false);
+                MessagingCenter.Send<OnboardingViewModel>(this, "SetupPushNotification");
+                await NavigationService.NavigateToAsync<MainViewModel>();
+                dialog?.Hide();
+                dialog?.Dispose();
+                dialog.TryDispose();
+                UserDialogs.Instance.Alert("Wallet restored successfully", "Info", "OK");
+
+            }
+            catch (Exception e)
+
+            {
+                System.Diagnostics.Debug.WriteLine("Backup Error: {0}", e);
+                dialog?.Hide();
+                dialog?.Dispose();
+                dialog.TryDispose();
+                throw;
+            }
+        }
+        
+        public ICommand RestoreBackupCommand => new Command(async () => await this.RestoreBackup());
 
         public ICommand SkipCommand { get; private set; }
         public ICommand NextCommand { get; private set; }

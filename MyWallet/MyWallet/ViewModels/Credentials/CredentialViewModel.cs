@@ -10,6 +10,7 @@ using MyWallet.Services.Interfaces;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -47,7 +48,7 @@ namespace MyWallet.ViewModels.Credentials
             _credentialName = ConvertNameFromeSchemaId(_credential.SchemaId).ToTitleCase();
             if (_credential.CreatedAtUtc != null)
             {
-                IssuedDate = (DateTime)_credential.CreatedAtUtc;             
+                IssuedDate = ((DateTime)_credential.CreatedAtUtc).ToLocalTime();             
             }
             someMaterialColor = new Helpers.SomeMaterialColor();
         }
@@ -55,6 +56,9 @@ namespace MyWallet.ViewModels.Credentials
         public async override Task InitializeAsync(object navigationData)
         {
             await base.InitializeAsync(navigationData);
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                .Where(_ => _.Type == ApplicationEventType.DeleteAllCredentials)
+                .Subscribe(async _ => await DeleteAll());
         }
 
         private string ConvertNameFromeSchemaId(string schemaId)
@@ -114,6 +118,37 @@ namespace MyWallet.ViewModels.Credentials
                     DialogService.Alert("Some thing wrong!", "Error", "OK");
                 }
                 
+            }
+        }
+
+        /// <summary>
+        /// Deletes all the credentials sharing the same connection ID.
+        /// Function must be called if a connection is removed
+        /// </summary>
+        /// <returns></returns>
+         private async Task DeleteAll()
+        {
+            try
+            {
+                var context = await _agentProvider.GetContextAsync();
+                var credentialsList = await _credentialService.ListAsync(context);
+                //DialogService.Loading("Removing Credentials");
+                if (!credentialsList.Count.Equals(0))
+                {
+                    foreach (var record in credentialsList)
+                    {
+                        if (record.ConnectionId == RelatedConnection.Id)
+                        {
+                            await _credentialService.DeleteCredentialAsync(context, record.Id);
+                        }
+                    }
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw;
             }
         }
 

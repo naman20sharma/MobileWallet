@@ -1,17 +1,13 @@
 ﻿using Hyperledger.Aries.Agents;
-using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Aries.Features.IssueCredential;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Hyperledger.Aries.Models.Records;
-using Hyperledger.Aries.Storage;
 using Plugin.LocalNotification;
 using Hyperledger.Aries.Contracts;
-using Hyperledger.Aries.Runtime;
 using MyWallet.Events;
-using System.Runtime.InteropServices;
+using Hyperledger.Aries.Features.BasicMessage;
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 
 namespace MyWallet.Services.Middlewares
 {
@@ -19,43 +15,41 @@ namespace MyWallet.Services.Middlewares
     {
         private readonly ICredentialService _credentialService;
         private readonly IEventAggregator _eventAggregator;
-        public MessageHandleMiddleWare(ICredentialService credentialService, 
+        public MessageHandleMiddleWare(ICredentialService credentialService,
             IEventAggregator eventAggregator)
         {
             _credentialService = credentialService;
             _eventAggregator = eventAggregator;
         }
 
-        private string GetMessageContent(string type)
-        {
-            //Check type to show message:
-            switch (type)
-            {
-                case "Hello":
-                    return "Hello world!";
-                default:
-                    return "You've got a message from mediator";
-            }
-        }
-
         private string HandleMessageTypeEventAndNotification(string type)
         {
-            switch(type)
+            switch (type)
             {
                 case MessageTypes.IssueCredentialNames.OfferCredential:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotCredentialOffer });
-                        return "You've got an Credential Offer";
+                        return "Credential Offer Received";
                     }
                 case MessageTypes.PresentProofNames.RequestPresentation:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });
-                        return "You've got an Proof Request";
+                        return "Proof Request Received";
                     }
                 case MessageTypes.IssueCredentialNames.IssueCredential:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialsUpdated });
-                        return "Accept credential successfully";
+                        return "Credentials has been issued successfully";
+                    }
+                case MessageTypes.BasicMessageType:
+                    {
+                        return "You have received a message";
+                    }
+
+                case MessageTypes.ConnectionResponse:
+                    {
+                        _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionsUpdated });
+                        return "A new Connection available, Tap here to view";
                     }
                 default:
                     return "You've got a message from mediator";
@@ -64,19 +58,24 @@ namespace MyWallet.Services.Middlewares
 
         public async Task OnMessageAsync(IAgentContext agentContext, UnpackedMessageContext messageContext)
         {
-            await _credentialService.ListAsync(agentContext);           
+            // _credentialService.ListAsync(agentContext);
             var messageType = messageContext.GetMessageType();
-            //var content = GetMessageContent(messageType);
             var content = HandleMessageTypeEventAndNotification(messageType);
             var notification = new NotificationRequest
             {
-                NotificationId = 100,
-                Title = "Test",
+                Android = new AndroidOptions()
+                { IconName = "AppNotification"},
+                NotificationId = 101,
+                Title = "Mediator",
                 Description = content,
                 ReturningData = "Dummy data", // Returning data when tapped on notification.
             };
+            if (messageType.Equals(MessageTypes.BasicMessageType))
+            {
+                notification.Description = String.Format($"{content} : {Environment.NewLine} {(messageContext.ContextRecord as BasicMessageRecord).Text}");
+            }
             NotificationCenter.Current.Show(notification);
-            Console.WriteLine($"thinhnnd - Message Type: {messageContext.GetMessageType()}");
+            Console.WriteLine($"Mediator - Message Type: {messageContext.GetMessageType()}");
         }
     }
 }

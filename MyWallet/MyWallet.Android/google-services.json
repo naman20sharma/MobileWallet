@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "732114647008",
+    "project_id": "mediator-test",
+    "storage_bucket": "mediator-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732114647008:android:200a17ea9fac13638a9d85",
+        "android_client_info": {
+          "package_name": "com.infyblockchain.mywallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732114647008-tpiri42v89dpqg3q71dtt18gj29m4laq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiaIWfwqmQEgcu6b7I-5t68iJVVA7_ho8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732114647008-tpiri42v89dpqg3q71dtt18gj29m4laq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732114647008:android:a57ea8dae417a9178a9d85",
+        "android_client_info": {
+          "package_name": "com.sample.mywallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732114647008-tpiri42v89dpqg3q71dtt18gj29m4laq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiaIWfwqmQEgcu6b7I-5t68iJVVA7_ho8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732114647008-tpiri42v89dpqg3q71dtt18gj29m4laq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

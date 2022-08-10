@@ -1,8 +1,10 @@
 ﻿using Acr.UserDialogs;
+using Hyperledger.Aries;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Contracts;
 using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Aries.Features.Discovery;
+using MyWallet.Events;
 using MyWallet.Extensions;
 using MyWallet.Services.Interfaces;
 using ReactiveUI;
@@ -10,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 
@@ -22,6 +25,7 @@ namespace MyWallet.ViewModels.Connections
         private readonly IDiscoveryService _discoveryService;
         private readonly IConnectionService _connectionService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly ConnectionRecord _record;
         Helpers.SomeMaterialColor someMaterialColor;
 
         public ConnectionViewModel(IUserDialogs userDialogs,
@@ -52,11 +56,56 @@ namespace MyWallet.ViewModels.Connections
                 _connectionImageUrl = _record.Alias.ImageUrl;
             if (_record.CreatedAtUtc != null)
             {
-                _createdDate = (DateTime)_record.CreatedAtUtc;
+                _createdDate = ((DateTime)_record.CreatedAtUtc).ToLocalTime();
             }
         }
 
-        private readonly ConnectionRecord _record;
+        private async Task DeleteConnection()
+        {
+            var result = await UserDialogs.Instance.ConfirmAsync("Are you sure you want to delete this connection, it will delete all credenetial records?", "Delete Connection", "Yes", "No");
+            if (result)
+            {
+                var dialog = UserDialogs.Instance.Loading("Deleting");
+                try
+                {
+                    var context = await _agentProvider.GetContextAsync();
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.DeleteAllCredentials });
+                    var isDeleted = await _connectionService.DeleteAsync(context, Record.Id);
+                    if (isDeleted)
+                    {
+                        _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionRemoved });
+                        //_eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
+                    }
+                    else
+                        await DialogService.AlertAsync("Sorry, Could not delete the connection.", "Deletion Error");
+                    if (dialog.IsShowing)
+                    {
+                        dialog?.Hide();
+                        dialog?.Dispose();
+                    }
+                    await NavigationService.NavigateBackAsync();
+                }
+                catch (AriesFrameworkException e)
+                {
+                    if (dialog.IsShowing)
+                    {
+                        dialog?.Hide();
+                        dialog?.Dispose();
+                    }
+                    DialogService.Alert($"Some error occured with Aries:{Environment.NewLine}  {e.Message}", "Error", "Ok");
+                }
+                catch (Exception e)
+                {
+                    if (dialog.IsShowing)
+                    {
+                        dialog?.Hide();
+                        dialog?.Dispose();
+                    }
+                    DialogService.Alert($"Some error occured :{Environment.NewLine}  {e.Message}", "Error", "Ok");
+                }
+            }
+        }
+
         public ConnectionRecord Record
         {
             get => this._record;
@@ -144,6 +193,12 @@ namespace MyWallet.ViewModels.Connections
         ICommand OnSelectDeleleButtonCommad => new Command(async () => {
             var context = await _agentProvider.GetContextAsync();
         });
+
+        public ICommand OnSelectDeleteMenuItem =>
+           new Command(async () =>
+           {
+              await  DeleteConnection();
+           });
         #endregion
     }
 }

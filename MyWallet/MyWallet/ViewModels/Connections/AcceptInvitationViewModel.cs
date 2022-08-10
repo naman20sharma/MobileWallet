@@ -55,7 +55,7 @@ namespace MyWallet.ViewModels.Connections
                     //var provisioningRecord = await _provisioningService.GetProvisioningAsync(agentContext.Wallet);
                     //var isEndpointUriAbsent = provisioningRecord.Endpoint.Uri == null;
 
-                    await _messageService.SendAsync(agentContext.Wallet, requestMessage, connectionRecord);
+                    await _messageService.SendAsync(agentContext, requestMessage, connectionRecord);
                     //if (isEndpointUriAbsent)
                     //{
                     //    string processRes = await _connectionService.ProcessResponseAsync(agentContext, respone, connectionRecord);

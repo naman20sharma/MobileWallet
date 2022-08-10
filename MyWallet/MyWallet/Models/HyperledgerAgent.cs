@@ -15,6 +15,8 @@ namespace MyWallet.Models
             AddForwardHandler();
             AddCredentialHandler();
             AddProofHandler();
+            AddBasicMessageHandler();
+            AddTrustPingHandler();
         }
     }
 }
