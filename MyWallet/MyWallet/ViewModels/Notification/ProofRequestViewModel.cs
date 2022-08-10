@@ -204,8 +204,7 @@ namespace MyWallet.ViewModels.Notification
                 var context = await _agentProvider.GetContextAsync();
                 var (message, proofRecord) = await _proofService.CreatePresentationAsync(context, ProofRequestRecord.Id, RequestedCredentials);
                 var connectionRecord = await _connectionService.GetAsync(context, proofRecord.ConnectionId);
-                await _messageService.SendAsync(context.Wallet, message, connectionRecord);
-                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.NotificationUpdated });
+                await _messageService.SendAsync(context, message, connectionRecord);
                 loadingDialog.Hide();
                 this.IsBusy = false;
                 await NavigationService.NavigateBackAsync();
@@ -214,6 +213,7 @@ namespace MyWallet.ViewModels.Notification
                 toastConfig.Position = ToastPosition.Bottom;
                 toastConfig.SetDuration(3000);
                 DialogService.Toast(toastConfig);
+                _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });
             }
             catch (IndyException e)
             {

@@ -48,8 +48,9 @@ namespace MyWallet.ViewModels
             await Notification.InitializeAsync(null);
             await Setting.InitializeAsync(null);
             await base.InitializeAsync(navigationData);
-            MessagingCenter.Send(new StartLongRunningTaskMessage(), "StartLongRunningTaskMessage");
-            HandleReceivedMessages();
+
+            //MessagingCenter.Send(new StartLongRunningTaskMessage(), "StartLongRunningTaskMessage");
+            //HandleReceivedMessages();
             Title = "Main Page";
         }
 
@@ -68,6 +69,7 @@ namespace MyWallet.ViewModels
 
             MessagingCenter.Subscribe<CancelledMessage>(this, "CancelledMessage", message =>
             {
+
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     //ticker.Text = "Cancelled";

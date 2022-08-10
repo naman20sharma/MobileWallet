@@ -56,6 +56,9 @@ namespace MyWallet.ViewModels.Credentials
         public async override Task InitializeAsync(object navigationData)
         {
             await base.InitializeAsync(navigationData);
+            _eventAggregator.GetEventByType<ApplicationEvent>()
+                .Where(_ => _.Type == ApplicationEventType.DeleteAllCredentials)
+                .Subscribe(async _ => await DeleteAll());
         }
 
         private string ConvertNameFromeSchemaId(string schemaId)
@@ -118,6 +121,36 @@ namespace MyWallet.ViewModels.Credentials
             }
         }
 
+        /// <summary>
+        /// Deletes all the credentials sharing the same connection ID.
+        /// Function must be called if a connection is removed
+        /// </summary>
+        /// <returns></returns>
+         private async Task DeleteAll()
+        {
+            try
+            {
+                var context = await _agentProvider.GetContextAsync();
+                var credentialsList = await _credentialService.ListAsync(context);
+                //DialogService.Loading("Removing Credentials");
+                if (!credentialsList.Count.Equals(0))
+                {
+                    foreach (var record in credentialsList)
+                    {
+                        if (record.ConnectionId == RelatedConnection.Id)
+                        {
+                            await _credentialService.DeleteCredentialAsync(context, record.Id);
+                        }
+                    }
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
 
         private ConnectionRecord _relatedConnection;
 

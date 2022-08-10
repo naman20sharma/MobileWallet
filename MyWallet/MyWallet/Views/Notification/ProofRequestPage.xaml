@@ -89,10 +89,13 @@
                 <Button
                     Style="{DynamicResource RedButtonStyle}"
                     Command="{Binding RejectProofRequestCommand}"
+                    CornerRadius="2"
+                    HorizontalOptions="FillAndExpand"
                     Text="Reject"/>
-                <Button 
-                    Command="{Binding AcceptProofRequestCommand}"                 
-                    Style="{DynamicResource BlueButtonStyle}"
+                <Button Command="{Binding AcceptProofRequestCommand}" IsEnabled="False"                    
+                    CornerRadius="2"
+                    HorizontalOptions="FillAndExpand"
+                    Style="{DynamicResource BlueButtonStyle}"   r
                     Text="Present"/>
             </StackLayout>
         </Grid>

@@ -121,9 +121,11 @@ namespace MyWallet.ViewModels.Notification
                 var loadingDialog = DialogService.Loading("Proccessing");
                 try
                 {
+                    var poolConfigName = Preferences.Get(Constants.PoolConfigurationName, "bcovrin-test");
+                    var a = await _poolService.GetPoolAsync(poolConfigName, 2);
                     var (requestMessage, credRecord) = await _credentialService.CreateRequestAsync(context, CredentialOffer.Id);
                     var connectionRecord = await _connectionService.GetAsync(context, credRecord.ConnectionId);
-                    await _messageService.SendAsync(context.Wallet, requestMessage, connectionRecord);
+                    await _messageService.SendAsync(context, requestMessage, connectionRecord);
                     loadingDialog.Hide();
                     await NavigationService.NavigateBackAsync();
                     var toastConfig = new ToastConfig("Accepted Credential Offer");

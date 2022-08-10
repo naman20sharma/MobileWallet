@@ -23,6 +23,7 @@ using Hyperledger.Indy;
 using Hyperledger.Aries;
 using System.Diagnostics;
 using Xamarin.Essentials;
+using Hyperledger.Aries.Routing;
 
 namespace MyWallet.ViewModels.Connections
 {
@@ -33,6 +34,7 @@ namespace MyWallet.ViewModels.Connections
         private readonly AgentOptions _options;
         private CloudWalletService _cloudWalletService;
         private readonly IAgentProvider _agentProvider;
+        private readonly IEdgeClientService _serviceClient;
         private readonly IConnectionService _connectionService;
         private readonly ILifetimeScope _scope;
         private readonly IEventAggregator _eventAggregator;
@@ -43,6 +45,7 @@ namespace MyWallet.ViewModels.Connections
                                    IEdgeProvisioningService edgeProvisioningService,
                                    IWalletAppConfiguration walletconfiguration,
                                    IOptions<AgentOptions> options,
+                                   IEdgeClientService cloudServiceClient,
                                    IAgentProvider agentProvider,
                                    ILifetimeScope scope,
                                    IEventAggregator eventAggregator,
@@ -52,6 +55,7 @@ namespace MyWallet.ViewModels.Connections
             _edgeProvisioningService = edgeProvisioningService;
             _walletConfiguration = walletconfiguration;
             _options = options.Value;
+            _serviceClient = cloudServiceClient;
             _cloudWalletService = cloudWalletService;
             _connectionService = connectionService;
             _agentProvider = agentProvider;
@@ -74,6 +78,17 @@ namespace MyWallet.ViewModels.Connections
             await RefreshConnectionsList();
         }
 
+        private async void AddDevice()
+        {
+            DeviceIdiom idiom = DeviceInfo.Idiom;
+            AddDeviceInfoMessage deviceInfoMessage = new AddDeviceInfoMessage
+            {
+                DeviceId = idiom.ToString(),
+                DeviceVendor = DeviceInfo.Platform.ToString()
+            };
+
+            await this._serviceClient.AddDeviceAsync(await _agentProvider.GetContextAsync(), deviceInfoMessage);
+        }
 
         public async Task RefreshConnectionsList()
         {

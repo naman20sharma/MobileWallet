@@ -21,18 +21,21 @@
                     x:Name="NetworkPicker"
                     ItemDisplayBinding="{Binding Name}" >
             </Picker>
-            <!--<Label Text="Backup"
+
+            <Label Text="Backup"
                    Margin="0,10,0,0"
-                   TextColor="{DynamicResource Key=AppMainColorLight}"/>-->
-            <!--<Button Text="Create Backup"
+                   TextColor="{DynamicResource Key=AppMainColorLight}"/>
+            <Button Text="Create Backup"
                     Style="{StaticResource Key=ButtonStylePrimary}"
                     HorizontalOptions="Fill"
                     VerticalOptions="Fill"
                     Command="{Binding CreateBackUpCommand}"
-                    />-->
-            <!--<Button Text="Restore Backup"
+
+                    />
+            <Button Text="Restore Backup"
                     Command="{Binding RestoreBackUpCommand}"
-                    Style="{DynamicResource Key=ButtonStyleSecondary}"/>-->
+                    Style="{DynamicResource Key=ButtonStyleSecondary}"/>
+
         </StackLayout>
         
         

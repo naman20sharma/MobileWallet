@@ -3,10 +3,8 @@ using Hyperledger.Aries;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Contracts;
 using Hyperledger.Aries.Features.BasicMessage;
-
 using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Aries.Features.Discovery;
-using Hyperledger.Aries.Storage;
 using MyWallet.Events;
 using MyWallet.Extensions;
 using MyWallet.Services.Interfaces;
@@ -33,6 +31,7 @@ namespace MyWallet.ViewModels.Connections
         private readonly IWalletRecordService _walletRecordService;
         private readonly IConnectionService _connectionService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly ConnectionRecord _record;
         Helpers.SomeMaterialColor someMaterialColor;
 
         public ConnectionViewModel(IUserDialogs userDialogs,
@@ -78,12 +77,12 @@ namespace MyWallet.ViewModels.Connections
                 try
                 {
                     var context = await _agentProvider.GetContextAsync();
+                    _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.DeleteAllCredentials });
                     var isDeleted = await _connectionService.DeleteAsync(context, Record.Id);
                     if (isDeleted)
                     {
-                        Preferences.Set("DeletedConnection", Record.Id);
-                        //_eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.DeleteAllCredentials });
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionRemoved });
+                        //_eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialRemoved });
                     }
                     else
                         await DialogService.AlertAsync("Sorry, Could not delete the connection.", "Deletion Error");
@@ -260,13 +259,8 @@ namespace MyWallet.ViewModels.Connections
         public ICommand OnSelectDeleteMenuItem =>
            new Command(async () =>
            {
-               await this.DeleteConnection();
+              await  DeleteConnection();
            });
-        //public ICommand OnSelectSendMessageMenuItem =>
-        //   new Command(async () =>
-        //   {
-        //       await this.SendMessage();
-        //   });
         #endregion
     }
 }

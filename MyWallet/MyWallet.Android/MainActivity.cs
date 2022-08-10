@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
@@ -23,6 +23,8 @@ using Plugin.Fingerprint;
 using Xamarin.Essentials;
 using Android.Webkit;
 using AndroidHUD;
+using Android.Systems;
+using Plugin.PushNotification;
 using Android.Bluetooth;
 using Xamarin.Forms.Internals;
 using Android.Provider;
@@ -60,14 +62,16 @@ namespace MyWallet.Droid
             // Initializing FFImageLoading
             CachedImageRenderer.Init(false);
 
-            NotificationCenter.CreateNotificationChannel(new Plugin.LocalNotification.Platform.Droid.NotificationChannelRequest()
-            {
-                Sound = Resource.Raw.swiftly.ToString(),
-                VibrationPattern = new long[] { 0, 1000 },
-                LockscreenVisibility = NotificationVisibility.Private,
-                LightColor = Android.Graphics.Color.AliceBlue
-            });
 
+            //NotificationCenter.CreateNotificationChannel(new Plugin.LocalNotification.Platform.Droid.NotificationChannelRequest()
+            //{
+            //    Sound = Resource.Raw.swiftly.ToString(),
+            //    VibrationPattern = new long[] {0, 1000},
+            //    LockscreenVisibility = NotificationVisibility.Private
+            //}) ;
+            //setupPushNotification();
+            //thinh nnd
+            
             if ((int)Build.VERSION.SdkInt >= 23)
                 CheckAndRequestRequiredPermissions();
 
@@ -98,6 +102,8 @@ namespace MyWallet.Droid
             }
             Preferences.Set("ExternalDirectoryPath", Android.OS.Environment.ExternalStorageDirectory.ToString());
 
+            Os.Setenv("EXTERNAL_STORAGE", FileSystem.AppDataDirectory, true);
+
             try
             {
                 Console.WriteLine("CRASH_TEST - loading c++_shared");
@@ -117,9 +123,33 @@ namespace MyWallet.Droid
             WireUpLongRunningTask();
 
             LoadApplication(_application);
-            NotificationCenter.NotifyNotificationTapped(Intent);
+            PushNotificationManager.ProcessIntent(this, Intent);
+            //NotificationCenter.NotifyNotificationTapped(Intent);
 
         }
+
+        private void setupPushNotification()
+        {
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                //Change for your default notification channel id here
+                PushNotificationManager.DefaultNotificationChannelId = "DefaultChannel";
+
+                //Change for your default notification channel name here
+                PushNotificationManager.DefaultNotificationChannelName = "General";
+                PushNotificationManager.DefaultNotificationChannelImportance = NotificationImportance.Max;
+            }
+
+            //If debug you should reset the token each time.
+#if DEBUG
+            PushNotificationManager.Initialize(this, true);
+#else
+            PushNotificationManager.Initialize(this, false);
+#endif
+
+            PushNotificationManager.IconResource = Resource.Drawable.AppNotification;
+        }
+
         //public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         //{
         //    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -128,9 +158,7 @@ namespace MyWallet.Droid
         //}
 
         readonly string[] _permissionsRequired =
-    {
-            Manifest.Permission.ReadExternalStorage,
-            Manifest.Permission.WriteExternalStorage,
+        {
             Manifest.Permission.Camera
         };
 
@@ -165,8 +193,9 @@ namespace MyWallet.Droid
         }
         protected override void OnNewIntent(Intent intent)
         {
-            NotificationCenter.NotifyNotificationTapped(intent);
             base.OnNewIntent(intent);
+            PushNotificationManager.ProcessIntent(this, intent);
+            NotificationCenter.NotifyNotificationTapped(intent);
         }
 
         void WireUpLongRunningTask()

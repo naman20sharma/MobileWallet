@@ -73,10 +73,19 @@
                 VerticalOptions="FillAndExpand">
                 <Button
                     Command="{Binding RejectCredentialOfferCommand}"
-                    Style="{DynamicResource RedButtonStyle}"
+                    BackgroundColor="{DynamicResource RedAccentColor}"
+                    BorderColor="{StaticResource AppMainColorLight}"
+                    TextColor="White" 
+                    BorderWidth="0.5"
+                    CornerRadius="2"
+                    HorizontalOptions="FillAndExpand"
                     Text="Decline"/>
                 <Button                   
-                    Style="{DynamicResource BlueButtonStyle}"
+                    HorizontalOptions="FillAndExpand"
+                    BackgroundColor="{DynamicResource AppMainColor}"
+                    CornerRadius="2"
+                    TextColor="White"
+
                     Command="{Binding AcceptCredentialOfferCommand}"
                     Text="Accept"/>
             </StackLayout>

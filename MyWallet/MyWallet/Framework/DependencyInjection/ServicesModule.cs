@@ -9,10 +9,10 @@ namespace MyWallet.DependencyInjection
         protected override void Load(ContainerBuilder builder)
         {
 
-            builder.RegisterType<MobileAgentProvider>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-        
+            //builder.RegisterType<MobileAgentProvider>()
+            //    .AsImplementedInterfaces()
+            //    .SingleInstance();
+
             builder.RegisterType<CloudWalletService>()
                 .AsSelf()
                 .SingleInstance();

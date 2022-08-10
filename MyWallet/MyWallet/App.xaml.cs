@@ -34,6 +34,9 @@ using MyWallet.Views.Setting;
 using MyWallet.Models.Onboarding;
 using MyWallet.Views.Onboarding;
 using MyWallet.ViewModels.Onboarding;
+using Plugin.PushNotification;
+using Hyperledger.Aries.Routing;
+using System.Timers;
 
 namespace MyWallet
 {
@@ -41,16 +44,27 @@ namespace MyWallet
     {
         public static IContainer Container { get; set; }
         public static IServiceProvider Provider { get; set; }
-        public App() => InitializeComponent();
+        public App()
+        {
+            InitializeComponent();
+            timer = new Timer
+            {
+                Enabled = false,
+                AutoReset = true,
+                Interval = TimeSpan.FromSeconds(8).TotalMilliseconds
+            };
+            timer.Elapsed += Timer_Elapsed;
+        }
 
         public App(IHost host) : this() => Host = host;
-
+        private readonly Timer timer;
         public static IHost Host { get; private set; }
 
         public static IHostBuilder BuildHost(Assembly platformSpecific = null) =>
             XamarinHost.CreateDefaultBuilder<App>()
                 .ConfigureServices((context, services) =>
                 {
+                    // NotificationCenter.Current.NotificationTapped += OnNotificationTapped;
                     services.AddAriesFramework();
                     services.AddAriesFramework(builder => builder.RegisterEdgeAgent(
                     options: options =>
@@ -67,15 +81,23 @@ namespace MyWallet
 
 
                         };
-                        options.WalletConfiguration.Id = Constants.LocalWalletIdKey;
-                        options.WalletCredentials.Key = Preferences.Get(Constants.LocalWalletCredentialKey, "DefaultKey");
+                        options.BackupDirectory = Path.Combine(
+                                path1: FileSystem.AppDataDirectory,
+                                path2: ".indy_client",
+                                path3: "backups");
+                        options.AgentName = Preferences.Get("AgentName", "Default");
+                        options.WalletConfiguration.Id = Preferences.Get("WalletConfigurationId", Constants.LocalWalletIdKey) ;
+                        options.WalletCredentials.Key = Preferences.Get("WalletCredentialId", "Default");
+                        options.PoolName = config.PoolConfigurationName;
                         options.ProtocolVersion = 2;
+                        options.AutoRespondCredentialOffer = true;
+                        options.AutoRespondCredentialRequest = true;
                     },
                     delayProvisioning: true));
-                    
+
 
                     services.AddHostedService<PoolConfigurator>();
-                    services.OverrideDefaultAgentProvider<MobileAgentProvider>();
+                    //services.OverrideDefaultAgentProvider<MobileAgentProvider>();
                     var containerBuilder = new ContainerBuilder();
                     containerBuilder.RegisterAssemblyModules(typeof(ViewModelsModule).Assembly);
                     containerBuilder.RegisterModule(new CoreModule());
@@ -91,10 +113,17 @@ namespace MyWallet
                     _navigationService = Container.Resolve<INavigationService>();
 
                 });
+
+        private static void OnNotificationTapped(NotificationTappedEventArgs e)
+        {
+
+        }
+
         Task InitializeTask;
         static INavigationService _navigationService;
         private async Task Initialize()
         {
+            this._cloudWalletService = Container.Resolve<CloudWalletService>();
             _navigationService.AddPageViewModelBinding<ConnectionsViewModel, ConnectionsPage>();
             _navigationService.AddPageViewModelBinding<ConnectionViewModel, ConnectionPage>();
             _navigationService.AddPageViewModelBinding<NotificationViewModel, NotificationPage>();
@@ -111,8 +140,9 @@ namespace MyWallet
             if (Preferences.Get("LocalWalletProvisioned", false))
             {
                 //Task.Run(async () => await _navigationService.NavigateToAsync<MainViewModel>());
+                SetupPushNotification();
                 await _navigationService.NavigateToAsync<MainViewModel>();
-                
+
             }
             else
             {
@@ -120,7 +150,9 @@ namespace MyWallet
                 //Task.Run(async () => await _navigationService.NavigateToAsync<RegisterPageViewModelV2>());
                 //await _navigationService.NavigateToAsync<RegisterPageViewModel>();
                 await _navigationService.NavigateToAsync<OnboardingViewModel>();
+                MessagingCenter.Subscribe<OnboardingViewModel>(this, "SetupPushNotification", obj => this.SetupPushNotification());
             }
+            timer.Start();
         }
         protected override void OnStart()
         {
@@ -129,9 +161,100 @@ namespace MyWallet
                 Host.Start();
                 InitializeTask = Initialize();
             }
-
         }
 
+        private void SetupPushNotification()
+        {
+
+            CrossPushNotification.Current.OnTokenRefresh += async (s, p) =>
+            {
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"TOKEN REC: {p.Token}");
+
+                    AddDeviceInfoMessage deviceInfoMessage = new AddDeviceInfoMessage()
+                    {
+                        DeviceId = p.Token,
+                        DeviceVendor = DeviceInfo.Platform.ToString()
+                    };
+
+                    await Container.Resolve<IEdgeClientService>().AddDeviceAsync((await Container.Resolve<IAgentProvider>().GetContextAsync()), deviceInfoMessage);
+
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.InnerException.Message);
+                }
+            };
+
+            CrossPushNotification.Current.OnNotificationReceived += (s, p) =>
+            {
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine("Received");
+                    if (p.Data.ContainsKey("body"))
+                    {
+                        Debug.WriteLine($"Body: {p.Data["body"]}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                }
+            };
+
+            CrossPushNotification.Current.OnNotificationOpened += (s, p) =>
+            {
+                System.Diagnostics.Debug.WriteLine("Opened");
+                foreach (var data in p.Data)
+                {
+                    System.Diagnostics.Debug.WriteLine($"{data.Key} : {data.Value}");
+                }
+
+                if (!string.IsNullOrEmpty(p.Identifier))
+                {
+                    Debug.WriteLine($"Identifier: {p.Identifier}");
+                }
+                else if (p.Data.ContainsKey("color"))
+                {
+                    //Device.BeginInvokeOnMainThread(() =>
+                    //{
+                    //    //mPage.Navigation.PushAsync(new ContentPage()
+                    //    ////{
+                    //        BackgroundColor = Color.FromHex($"{p.Data["color"]}")
+                    //    });
+                    //});
+                }
+                else if (p.Data.ContainsKey("aps.alert.title"))
+                {
+                    Debug.WriteLine($"Title: {p.Data["aps.alert.title"]}");
+                }
+            };
+            CrossPushNotification.Current.OnNotificationDeleted += (s, p) =>
+            {
+                System.Diagnostics.Debug.WriteLine("Dismissed");
+            };
+        }
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // Check for new messages with the mediator agent if successfully provisioned
+            if (Preferences.Get("LocalWalletProvisioned", false))
+            {
+                Device.BeginInvokeOnMainThread(async () =>
+                {
+                    try
+                    {
+                        //var context = await Container.Resolve<IAgentProvider>().GetContextAsync();
+                        int count = await this._cloudWalletService.FetchCloudMessagesAsync();
+                        Console.WriteLine($@"{count} were processed.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
+                });
+            }
+        }
         protected override void OnAppLinkRequestReceived(Uri uri)
         {
             // Deeplink functionality code here
@@ -140,16 +263,18 @@ namespace MyWallet
         protected override void OnSleep()
         {
             Host.Sleep();
+            timer.Stop();
         }
 
         protected override void OnResume()
         {
             Host.Resume();
+            timer.Start();
         }
 
         public CloudWalletService _cloudWalletService;
 
-        
+
 
         //public async void HandlePushNotification(PushNotificationReceivedEventArgs e)
         //{

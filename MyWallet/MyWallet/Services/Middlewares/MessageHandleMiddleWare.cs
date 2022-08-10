@@ -29,17 +29,17 @@ namespace MyWallet.Services.Middlewares
                 case MessageTypes.IssueCredentialNames.OfferCredential:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotCredentialOffer });
-                        return "Credential Offer Received, Tap here to view";
+                        return "Credential Offer Received";
                     }
                 case MessageTypes.PresentProofNames.RequestPresentation:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.GotProofRequestMessage });
-                        return "Proof Request Received, Tap here to view";
+                        return "Proof Request Received";
                     }
                 case MessageTypes.IssueCredentialNames.IssueCredential:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.CredentialsUpdated });
-                        return "Credentials has been issued successfully, Tap here to view";
+                        return "Credentials has been issued successfully";
                     }
                 case MessageTypes.BasicMessageType:
                     {
@@ -49,7 +49,7 @@ namespace MyWallet.Services.Middlewares
                 case MessageTypes.ConnectionResponse:
                     {
                         _eventAggregator.Publish(new ApplicationEvent() { Type = ApplicationEventType.ConnectionsUpdated });
-                        return "A new Connection is available, Tap here to view";
+                        return "A new Connection available, Tap here to view";
                     }
                 default:
                     return string.Empty;
@@ -58,7 +58,7 @@ namespace MyWallet.Services.Middlewares
 
         public async Task OnMessageAsync(IAgentContext agentContext, UnpackedMessageContext messageContext)
         {
-           
+            // _credentialService.ListAsync(agentContext);
             var messageType = messageContext.GetMessageType();
             var content = HandleMessageTypeEventAndNotification(messageType);
             if (content.Equals(string.Empty))
@@ -67,15 +67,14 @@ namespace MyWallet.Services.Middlewares
             {
                 Android = new AndroidOptions()
                 { IconName = "AppNotification"},
-                NotificationId = 100,
+                NotificationId = 101,
                 Title = "Mediator",
                 Description = content,
                 ReturningData = content, // Returning data when tapped on notification.
             };
             if (messageType.Equals(MessageTypes.BasicMessageType))
             {
-                if ((messageContext.ContextRecord as BasicMessageRecord).Text.Contains("received"))
-                    return;
+
                 notification.Description = String.Format($"{content} : {Environment.NewLine} {(messageContext.ContextRecord as BasicMessageRecord).Text}");
             }
             NotificationCenter.Current.Show(notification);
